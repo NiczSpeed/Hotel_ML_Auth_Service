@@ -27,8 +27,9 @@ public class UserService {
         return userRepository.findAll();
     }
 
+
     public User save(UserDto userDto) {
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        return userRepository.save(user);
+        return userRepository.save(UserMapper.Instance.userDtoToUser(userDto));
     }
 }

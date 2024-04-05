@@ -11,7 +11,6 @@ public interface PrivilegeMapper {
 
     PrivilegeMapper Instance = Mappers.getMapper(PrivilegeMapper.class);
 
-    @Mapping(source = "uuid", target = "uuid")
     PrivilegeDto privilegeDto (Privilege privilege);
 
 }

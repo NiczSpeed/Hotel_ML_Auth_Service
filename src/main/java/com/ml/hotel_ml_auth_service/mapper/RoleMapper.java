@@ -11,7 +11,6 @@ public interface RoleMapper {
 
     RoleMapper Instance = Mappers.getMapper(RoleMapper.class);
 
-    @Mapping(source = "uuid", target = "uuid")
     RoleDto roleToRoleDto(Role role);
 
 }

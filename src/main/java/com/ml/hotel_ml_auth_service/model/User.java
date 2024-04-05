@@ -3,11 +3,12 @@ package com.ml.hotel_ml_auth_service.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.UUID;
 
 @Entity
-@Builder
 @Getter
 @Setter
 @AllArgsConstructor
@@ -23,6 +24,8 @@ public class User {
     private String email;
     @Column(name = "password")
     private String password;
+    @Column(name = "CreationDate")
+    private LocalDate creationDate;
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable
     (

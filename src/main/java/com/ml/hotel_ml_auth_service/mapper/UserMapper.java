@@ -13,6 +13,6 @@ public interface UserMapper {
 
 
     UserDto userToUserDto(User user);
-
+    @Mapping(source = "enabled", target = "enabled")
     User userDtoToUser(UserDto userDto);
 }

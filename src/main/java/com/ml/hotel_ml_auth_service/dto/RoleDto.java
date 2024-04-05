@@ -15,7 +15,7 @@ public class RoleDto {
 
     private UUID uuid;
     private String name;
-    private Collection<User> users;
-    private Collection<Privilege> privileges;
+    private Collection<UserDto> users;
+    private Collection<PrivilegeDto> privileges;
 
 }

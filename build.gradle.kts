@@ -5,7 +5,10 @@ plugins {
 }
 
 group = "com.ml"
-version = "0.0.1-SNAPSHOT"
+version = "0.0.1"
+
+val mapstructVersion = "1.5.5.Final"
+val junitJupiterVersion = "5.10.1"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_21
@@ -21,6 +24,17 @@ repositories {
 	mavenCentral()
 }
 
+tasks.jar {
+	manifest {
+		archiveFileName.set("${project.name}-${project.version}.jar")
+	}
+}
+
+tasks.test {
+	useJUnitPlatform()
+}
+
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-rest")
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
@@ -28,6 +42,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.apache.kafka:kafka-streams")
 	implementation("org.springframework.kafka:spring-kafka")
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation("org.mapstruct:mapstruct:${mapstructVersion}")
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	runtimeOnly("com.h2database:h2")
@@ -36,6 +52,11 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.kafka:spring-kafka-test")
 	testImplementation("org.springframework.security:spring-security-test")
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+	testImplementation("org.instancio:instancio-junit:4.5.0")
+	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+	annotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
 }
 
 tasks.withType<Test> {

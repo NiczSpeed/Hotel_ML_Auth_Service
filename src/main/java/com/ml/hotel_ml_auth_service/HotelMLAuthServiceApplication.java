@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class HotelMlAuthServiceApplication {
+public class HotelMLAuthServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(HotelMlAuthServiceApplication.class, args);
+		SpringApplication.run(HotelMLAuthServiceApplication.class, args);
 	}
 
 }

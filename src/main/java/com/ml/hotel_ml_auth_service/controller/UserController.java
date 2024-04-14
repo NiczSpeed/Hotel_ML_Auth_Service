@@ -31,9 +31,7 @@ public class UserController {
 //    }
 
     @PostMapping("/user/register")
-    public ResponseEntity<?> register(@RequestBody UserDto userDto, @RequestBody RoleDto roleDto) {
-        roleService.save(roleDto);
-
+    public ResponseEntity<?> register(@RequestBody UserDto userDto) {
         return new ResponseEntity<>(userService.save(userDto), HttpStatus.CREATED);
     }
 

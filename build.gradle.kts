@@ -8,7 +8,7 @@ group = "com.ml"
 version = "0.0.1"
 
 val mapstructVersion = "1.5.5.Final"
-val junitJupiterVersion = "5.10.1"
+val junitJupiterVersion = "5.10.2"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_21

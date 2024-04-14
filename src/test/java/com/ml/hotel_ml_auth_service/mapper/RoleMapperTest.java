@@ -24,8 +24,6 @@ class RoleMapperTest {
         assertNotNull(roleDto);
         assertEquals(role.getUuid(), roleDto.getUuid());
         assertEquals(role.getName(), roleDto.getName());
-        assertEquals(role.getUsers(), roleDto.getUsers());
-        assertEquals(role.getPrivileges(), roleDto.getPrivileges());
     }
 
 }

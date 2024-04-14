@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -26,7 +25,7 @@ public class User {
     private String password;
     @Column(name = "CreationDate")
     private LocalDate creationDate;
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
     @JoinTable
     (
         name = "USERS_ROLE",

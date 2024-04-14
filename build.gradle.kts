@@ -9,6 +9,7 @@ version = "0.0.1"
 
 val mapstructVersion = "1.5.5.Final"
 val junitJupiterVersion = "5.10.2"
+val instancioVersion = "4.3.1"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_21
@@ -54,7 +55,7 @@ dependencies {
 	testImplementation("org.springframework.security:spring-security-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
-	testImplementation("org.instancio:instancio-junit:4.5.0")
+	testImplementation("org.instancio:instancio-junit:${instancioVersion}")
 	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
 	annotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
 }

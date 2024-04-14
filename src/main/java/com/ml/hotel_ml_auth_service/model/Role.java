@@ -30,7 +30,7 @@ public class Role {
     private Collection<User> users;
 
     @Column(name = "privileges")
-    @ManyToMany
+    @ManyToMany(cascade=CascadeType.ALL)
     @JoinTable
     (
         name = "ROLES_PRIVILEGES",

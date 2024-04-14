@@ -16,7 +16,7 @@ class PrivilegeMapperTest {
         Privilege privilege = Instancio.create(Privilege.class);
 
         //when
-        PrivilegeDto privilegeDto = PrivilegeMapper.Instance.privilegeDto(privilege);
+        PrivilegeDto privilegeDto = PrivilegeMapper.Instance.privilegeToPrivilegeDto(privilege);
 
         //then
         assertNotNull(privilegeDto);

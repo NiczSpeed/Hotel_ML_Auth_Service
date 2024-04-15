@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Cascade;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -30,12 +31,13 @@ public class Role {
     private Collection<User> users;
 
     @Column(name = "privileges")
-    @ManyToMany(cascade=CascadeType.ALL)
+    @ManyToMany
+//    @Cascade(org.hibernate.annotations.CascadeType.PERSIST)
     @JoinTable
     (
         name = "ROLES_PRIVILEGES",
         joinColumns = @JoinColumn(name = "role_uuid", referencedColumnName = "uuid"),
-        inverseJoinColumns = @JoinColumn(name = "privilege_uuid", referencedColumnName = "uuid")
+        inverseJoinColumns = @JoinColumn(name = "privilege_uuid")
     )
     private Collection<Privilege> privileges;
 }

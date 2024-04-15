@@ -2,6 +2,7 @@ package com.ml.hotel_ml_auth_service.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Cascade;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -25,11 +26,13 @@ public class User {
     private String password;
     @Column(name = "CreationDate")
     private LocalDate creationDate;
-    @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    @ManyToMany
+//    @Cascade(org.hibernate.annotations.CascadeType.PERSIST)
+
     @JoinTable
     (
         name = "USERS_ROLE",
-        joinColumns = @JoinColumn(name = "user_uuid", referencedColumnName = "uuid"),
+        joinColumns = @JoinColumn(name = "user_uuid"),
         inverseJoinColumns = @JoinColumn(name = "role_uuid", referencedColumnName = "uuid")
     )
     private Collection<Role> roles;

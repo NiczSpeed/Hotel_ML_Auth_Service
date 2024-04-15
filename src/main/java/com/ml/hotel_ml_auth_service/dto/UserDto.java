@@ -5,13 +5,11 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.UUID;
 
 @Getter
 @Setter
 public class UserDto {
 
-    private UUID uuid;
     private String email;
     private String password;
     private LocalDate creationDate = LocalDate.now();

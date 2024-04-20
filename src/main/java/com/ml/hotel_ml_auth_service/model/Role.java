@@ -1,13 +1,11 @@
 package com.ml.hotel_ml_auth_service.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Cascade;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -28,16 +26,16 @@ public class Role {
 
     @Column(name = "users")
     @ManyToMany(mappedBy = "roles")
-    private Collection<User> users;
+    private Set<User> users;
 
     @Column(name = "privileges")
-    @ManyToMany
-//    @Cascade(org.hibernate.annotations.CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.EAGER)
+//    @Cascade({org.hibernate.annotations.CascadeType.PERSIST, org.hibernate.annotations.CascadeType.MERGE})
     @JoinTable
     (
         name = "ROLES_PRIVILEGES",
-        joinColumns = @JoinColumn(name = "role_uuid", referencedColumnName = "uuid"),
+        joinColumns = @JoinColumn(name = "role_uuid"),
         inverseJoinColumns = @JoinColumn(name = "privilege_uuid")
     )
-    private Collection<Privilege> privileges;
+    private Set<Privilege> privileges;
 }

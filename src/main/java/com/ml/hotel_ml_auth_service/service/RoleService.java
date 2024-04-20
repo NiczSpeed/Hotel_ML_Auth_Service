@@ -18,7 +18,7 @@ public class RoleService {
     }
 
     public Role save(RoleDto roleDto) {
-       return roleRepository.save(RoleMapper.Instance.roleDtoToRole(roleDto));
+       return roleRepository.save(RoleMapper.Instance.mapRoleDtoToRole(roleDto));
     }
 
 

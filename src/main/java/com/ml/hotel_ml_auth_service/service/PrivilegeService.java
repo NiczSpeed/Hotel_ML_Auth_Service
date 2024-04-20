@@ -19,7 +19,7 @@ public class PrivilegeService {
     }
 
     protected Privilege save(PrivilegeDto privilegeDto) {
-       return privilegeRepository.save(PrivilegeMapper.Instance.privilegeDtoToPrivilege(privilegeDto));
+       return privilegeRepository.save(PrivilegeMapper.Instance.mapPrivilegeDtoToPrivilege(privilegeDto));
     }
 
 }

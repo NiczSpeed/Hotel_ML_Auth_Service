@@ -3,6 +3,7 @@ package com.ml.hotel_ml_auth_service.dto;
 import lombok.*;
 
 import java.util.Collection;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -11,7 +12,7 @@ import java.util.Collection;
 public class RoleDto {
 
     private String name;
-    private Collection<UserDto> users;
-    private Collection<PrivilegeDto> privileges;
+    private Set<UserDto> users;
+    private Set<PrivilegeDto> privileges;
 
 }

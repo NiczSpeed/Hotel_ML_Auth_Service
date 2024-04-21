@@ -1,11 +1,9 @@
 package com.ml.hotel_ml_auth_service.repository;
 
-import com.ml.hotel_ml_auth_service.dto.RoleDto;
 import com.ml.hotel_ml_auth_service.model.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 

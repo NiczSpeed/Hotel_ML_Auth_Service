@@ -1,18 +1,15 @@
 package com.ml.hotel_ml_auth_service.dto;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.util.Collection;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
 public class RoleDto {
-
+    private UUID uuid;
     private String name;
-    private Set<UserDto> users;
     private Set<PrivilegeDto> privileges;
-
 }

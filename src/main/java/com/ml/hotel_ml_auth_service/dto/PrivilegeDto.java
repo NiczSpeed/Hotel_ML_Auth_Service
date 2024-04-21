@@ -1,10 +1,10 @@
 package com.ml.hotel_ml_auth_service.dto;
 
 
-import lombok.*;
-
-import java.util.Collection;
-import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 
 @Getter
@@ -12,8 +12,5 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PrivilegeDto {
-
     private String name;
-    private Set<RoleDto> roles;
-
 }

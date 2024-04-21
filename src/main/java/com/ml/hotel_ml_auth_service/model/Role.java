@@ -2,17 +2,16 @@ package com.ml.hotel_ml_auth_service.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Cascade;
 
-import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 
-@Entity
+@Entity(name = "roles")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"users", "privileges"})
 @Table(name = "ROLES")
 public class Role {
 

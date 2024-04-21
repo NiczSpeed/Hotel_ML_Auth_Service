@@ -4,13 +4,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
 
 @Getter
 @Setter
 public class UserDto {
-
     private String email;
     private String password;
     private LocalDate creationDate = LocalDate.now();
@@ -19,5 +17,4 @@ public class UserDto {
     private String lastName;
     private boolean isAccountNonExpired = true;
     private boolean isEnabled = true;
-
 }

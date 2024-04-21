@@ -2,20 +2,17 @@ package com.ml.hotel_ml_auth_service.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.Fetch;
-import org.springframework.data.repository.cdi.Eager;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 
-@Entity
+@Entity(name = "users")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"roles"})
 @Table(name = "USERS")
 public class User {
 

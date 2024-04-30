@@ -4,15 +4,15 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 
-@Entity
+@Entity(name = "users")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"roles"})
 @Table(name = "USERS")
 public class User {
 
@@ -27,13 +27,15 @@ public class User {
     @Column(name = "CreationDate")
     private LocalDate creationDate;
     @ManyToMany(fetch = FetchType.EAGER)
+//    @Cascade({org.hibernate.annotations.CascadeType.PERSIST, org.hibernate.annotations.CascadeType.MERGE})
+
     @JoinTable
     (
         name = "USERS_ROLE",
-        joinColumns = @JoinColumn(name = "user_uuid", referencedColumnName = "uuid"),
-        inverseJoinColumns = @JoinColumn(name = "role_uuid", referencedColumnName = "uuid")
+        joinColumns = @JoinColumn(name = "user_uuid"),
+        inverseJoinColumns = @JoinColumn(name = "role_uuid")
     )
-    private Collection<Role> roles;
+    private Set<Role> roles;
     @Column(name = "firstName")
     private String firstName;
     @Column(name = "lastName")

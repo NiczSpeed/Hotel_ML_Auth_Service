@@ -2,12 +2,16 @@ package com.ml.hotel_ml_auth_service.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 
-@Entity
+@Entity(name = "privileges")
 @Getter
+@Setter
+@ToString(exclude = {"roles"})
 @Table(name = "PRIVILEGE")
 public class Privilege {
 
@@ -21,6 +25,6 @@ public class Privilege {
 
     @Column(name = "roles")
     @ManyToMany(mappedBy = "privileges")
-    private Collection<Role> roles;
+    private Set<Role> roles;
 
 }

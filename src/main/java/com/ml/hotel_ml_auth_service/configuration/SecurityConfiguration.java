@@ -32,8 +32,9 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/user/register").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("auth/register").permitAll()
+                        .requestMatchers("auth/test").permitAll() //kafka jest tu podloczona zamienie to pozniej z auth/register
+                        .requestMatchers("auth/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
 
                 .httpBasic(Customizer.withDefaults())
@@ -46,6 +47,8 @@ public class SecurityConfiguration {
 //                .httpBasic(Customizer.withDefaults()).logout(logout -> logout
 //                        .logoutUrl("/logout")
 //                        .addLogoutHandler(new SecurityContextLogoutHandler()))
+
+
 
                 .csrf(AbstractHttpConfigurer::disable)
                 .build();

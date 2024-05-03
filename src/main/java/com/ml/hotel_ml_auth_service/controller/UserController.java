@@ -1,23 +1,28 @@
 package com.ml.hotel_ml_auth_service.controller;
 
 import com.ml.hotel_ml_auth_service.dto.UserDto;
-import com.ml.hotel_ml_auth_service.service.RoleService;
 import com.ml.hotel_ml_auth_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 
 @RestController
 @RequestMapping("/auth")
 public class UserController {
 
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     private final UserService userService;
 
     @Autowired
-    public UserController(UserService userService, RoleService roleService) {
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
@@ -26,10 +31,20 @@ public class UserController {
         return new ResponseEntity<>(userService.save(userDto), HttpStatus.CREATED);
     }
 
-//    @RequestMapping("/login")
-//    public ResponseEntity<?> login(@RequestBody UserDto userDto) {
-//
-//    }
+    @GetMapping("/token")
+    public String getToken(@RequestBody UserDto userDto) {
+       Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDto.getEmail(), userDto.getPassword()));
+       if(auth.isAuthenticated()) {
+           return userService.generateJwtToken(userDto.getEmail());
+       }
+       else{throw new ResponseStatusException(HttpStatus.FORBIDDEN);}
+    }
+
+
+    @GetMapping("/")
+    public String welcomeEndpoint(){
+        return "Welcome to Ml Auth Service";
+    }
 
 
 

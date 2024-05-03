@@ -10,7 +10,7 @@ version = "0.0.1"
 val mapstructVersion = "1.5.5.Final"
 val junitJupiterVersion = "5.10.2"
 val instancioVersion = "4.4.0"
-val jwtVersion = "4.4.0"
+val jwtVersion = "0.12.5"
 val jsonVersion = "20240303"
 
 java {
@@ -47,11 +47,13 @@ dependencies {
 	implementation("org.springframework.kafka:spring-kafka")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.mapstruct:mapstruct:${mapstructVersion}")
-	implementation("com.auth0:java-jwt:${jwtVersion}")
+	implementation("io.jsonwebtoken:jjwt-api:${jwtVersion}")
+	implementation("io.jsonwebtoken:jjwt-impl:${jwtVersion}")
+	implementation("io.jsonwebtoken:jjwt-jackson:${jwtVersion}")
 	implementation("org.json:json:${jsonVersion}")
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
-	runtimeOnly("com.h2database:h2")
+//	runtimeOnly("com.h2database:h2")
 	runtimeOnly("org.postgresql:postgresql")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

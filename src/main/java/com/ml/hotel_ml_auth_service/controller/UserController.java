@@ -31,15 +31,6 @@ public class UserController {
         return new ResponseEntity<>(userService.save(userDto), HttpStatus.CREATED);
     }
 
-    @GetMapping("/token")
-    public String getToken(@RequestBody UserDto userDto) {
-       Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDto.getEmail(), userDto.getPassword()));
-       if(auth.isAuthenticated()) {
-           return userService.generateJwtToken(userDto.getEmail());
-       }
-       else{throw new ResponseStatusException(HttpStatus.FORBIDDEN);}
-    }
-
 
     @GetMapping("/")
     public String welcomeEndpoint(){

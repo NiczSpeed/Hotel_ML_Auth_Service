@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
 
 import static com.ml.hotel_ml_auth_service.mapper.UserMapper.Instance;
 
@@ -28,11 +29,14 @@ public class UserService {
 
     private final AuthenticationManager authenticationManager;
 
+    Logger logger = Logger.getLogger(getClass().getName());
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final KafkaTemplate kafkaTemplate;
     private final JwtGeneratorService jwtGeneratorService;
+
 
     @Autowired
     public UserService(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository, KafkaTemplate kafkaTemplate, JwtGeneratorService jwtGeneratorService) {
@@ -83,8 +87,8 @@ public class UserService {
     private String sendJwtToken(String message) {
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send("jwt_topic", Base64.getEncoder().encodeToString(message.getBytes()));
         future.whenComplete((result, exception) -> {
-            if (exception != null) System.out.println(exception.getMessage());
-            else System.out.println("Message sent successfully");
+            if (exception != null) logger.severe(exception.getMessage());
+            else logger.info("Message sent successfully");
         });
         return message;
     }

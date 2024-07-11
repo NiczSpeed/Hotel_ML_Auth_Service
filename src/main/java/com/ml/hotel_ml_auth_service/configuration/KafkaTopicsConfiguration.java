@@ -18,7 +18,7 @@ public class KafkaTopicsConfiguration {
 
     @Bean
     public NewTopic errorRequestTopicRegistration(){
-        return TopicBuilder.name("error_request_topic_register")
+        return TopicBuilder.name("error_request_topic")
                 .partitions(12)
                 .replicas(3)
                 .build();
@@ -26,7 +26,7 @@ public class KafkaTopicsConfiguration {
 
     @Bean
     public NewTopic successRequestTopicRegistration(){
-        return TopicBuilder.name("success_request_topic_register")
+        return TopicBuilder.name("success_request_topic")
                 .partitions(12)
                 .replicas(3)
                 .build();

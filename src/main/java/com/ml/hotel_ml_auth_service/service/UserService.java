@@ -73,17 +73,15 @@ public class UserService {
                 userDto.setLastName(json.optString("lastName"));
                 save(userDto);
                 logger.info("User saved: " + userDto);
-                sendSuccessRequestMessage("User Successfully added!", "register", messageId);
+                sendRequestMessage("User Successfully added!", messageId, "success_request_topic");
             } else {
                 logger.info("User already exists!");
-                sendErrorRequestMessage("User already Exist!", "register", messageId);
+                sendRequestMessage("User already Exist!!", messageId, "error_request_topic");
             }
         }catch (Exception e) {
             logger.severe("Error while saving user: " + e.getMessage());
         }
     }
-
-
 
     public User save(UserDto userDto) {
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
@@ -138,23 +136,11 @@ public class UserService {
         return false;
     }
 
-    private String sendErrorRequestMessage(String message, String type, String messageId) {
+    private String sendRequestMessage(String message, String messageId, String topic) {
         JSONObject json = new JSONObject();
         json.put("messageId", messageId);
         json.put("message", message);
-        CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send("error_request_topic_"+type, json.toString());
-        future.whenComplete((result, exception) -> {
-            if (exception != null) logger.severe(exception.getMessage());
-            else logger.info("Error Message sent successfully!");
-        });
-        return message;
-    }
-
-    private String sendSuccessRequestMessage(String message, String type, String messageId) {
-        JSONObject json = new JSONObject();
-        json.put("messageId", messageId);
-        json.put("message", message);
-        CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send("success_request_topic_"+type, json.toString());
+        CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, json.toString());
         future.whenComplete((result, exception) -> {
             if (exception != null) logger.severe(exception.getMessage());
             else logger.info("Message send successfully!");

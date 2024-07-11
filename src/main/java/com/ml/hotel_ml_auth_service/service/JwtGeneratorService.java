@@ -1,17 +1,12 @@
 package com.ml.hotel_ml_auth_service.service;
 
-import com.fasterxml.jackson.databind.ser.Serializers;
-import com.ml.hotel_ml_auth_service.dto.RoleDto;
-import com.ml.hotel_ml_auth_service.dto.UserDto;
 import com.ml.hotel_ml_auth_service.exception.UserNotFoundException;
 import com.ml.hotel_ml_auth_service.model.User;
 import com.ml.hotel_ml_auth_service.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

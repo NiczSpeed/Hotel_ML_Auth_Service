@@ -6,6 +6,10 @@ import com.ml.hotel_ml_auth_service.mapper.RoleMapper;
 import com.ml.hotel_ml_auth_service.model.User;
 import com.ml.hotel_ml_auth_service.repository.RoleRepository;
 import com.ml.hotel_ml_auth_service.repository.UserRepository;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import org.apache.catalina.session.StandardSession;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -13,9 +17,12 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -54,14 +61,29 @@ public class UserService {
 
     @KafkaListener(topics = "register_topic", groupId = "hotel_ml_auth_service")
     private void saveUser(String message) {
-        JSONObject json = decodeMessage(message);
-        UserDto userDto = new UserDto();
-        userDto.setEmail(json.optString("email"));
-        userDto.setPassword(json.optString("password"));
-        userDto.setFirstName(json.optString("firstName"));
-        userDto.setLastName(json.optString("lastName"));
-        save(userDto);
+        try {
+            JSONObject json = decodeMessage(message);
+            String messageId = json.optString("messageId");
+
+            if (!checkIfUserExists(json.optString("email"))) {
+                UserDto userDto = new UserDto();
+                userDto.setEmail(json.optString("email"));
+                userDto.setPassword(json.optString("password"));
+                userDto.setFirstName(json.optString("firstName"));
+                userDto.setLastName(json.optString("lastName"));
+                save(userDto);
+                logger.info("User saved: " + userDto);
+                sendSuccessRequestMessage("User Successfully added!", "register", messageId);
+            } else {
+                logger.info("User already exists!");
+                sendErrorRequestMessage("User already Exist!", "register", messageId);
+            }
+        }catch (Exception e) {
+            logger.severe("Error while saving user: " + e.getMessage());
+        }
     }
+
+
 
     public User save(UserDto userDto) {
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
@@ -106,5 +128,40 @@ public class UserService {
         message = new String(decodedBytes);
         return new JSONObject(message);
     }
+
+    boolean checkIfUserExists(String email) {
+        for (User user : userRepository.findAll()) {
+            if (user.getEmail().equals(email)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String sendErrorRequestMessage(String message, String type, String messageId) {
+        JSONObject json = new JSONObject();
+        json.put("messageId", messageId);
+        json.put("message", message);
+        CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send("error_request_topic_"+type, json.toString());
+        future.whenComplete((result, exception) -> {
+            if (exception != null) logger.severe(exception.getMessage());
+            else logger.info("Error Message sent successfully!");
+        });
+        return message;
+    }
+
+    private String sendSuccessRequestMessage(String message, String type, String messageId) {
+        JSONObject json = new JSONObject();
+        json.put("messageId", messageId);
+        json.put("message", message);
+        CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send("success_request_topic_"+type, json.toString());
+        future.whenComplete((result, exception) -> {
+            if (exception != null) logger.severe(exception.getMessage());
+            else logger.info("Message send successfully!");
+        });
+        return message;
+    }
+
+
 
 }

@@ -11,8 +11,24 @@ public class KafkaTopicsConfiguration {
     @Bean
     public NewTopic jwtTopic(){
         return TopicBuilder.name("jwt_topic")
-                .partitions(10)
-                .replicas(2)
+                .partitions(12)
+                .replicas(3)
+                .build();
+    }
+
+    @Bean
+    public NewTopic errorRequestTopicRegistration(){
+        return TopicBuilder.name("error_request_topic_register")
+                .partitions(12)
+                .replicas(3)
+                .build();
+    }
+
+    @Bean
+    public NewTopic successRequestTopicRegistration(){
+        return TopicBuilder.name("success_request_topic_register")
+                .partitions(12)
+                .replicas(3)
                 .build();
     }
 

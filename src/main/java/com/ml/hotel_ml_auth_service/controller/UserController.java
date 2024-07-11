@@ -13,25 +13,25 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 public class UserController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    private final UserService userService;
-
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserDto userDto) {
-        return new ResponseEntity<>(userService.save(userDto), HttpStatus.CREATED);
-    }
-
-
-    @GetMapping("/")
-    public String welcomeEndpoint(){
-        return "Welcome to Ml Auth Service";
-    }
+//    @Autowired
+//    private AuthenticationManager authenticationManager;
+//
+//    private final UserService userService;
+//
+//    @Autowired
+//    public UserController(UserService userService) {
+//        this.userService = userService;
+//    }
+//
+//    @PostMapping("/register")
+//    public ResponseEntity<?> register(@RequestBody UserDto userDto) {
+//        return new ResponseEntity<>(userService.save(userDto), HttpStatus.CREATED);
+//    }
+//
+//
+//    @GetMapping("/")
+//    public String welcomeEndpoint(){
+//        return "Welcome to Ml Auth Service";
+//    }
 
 }

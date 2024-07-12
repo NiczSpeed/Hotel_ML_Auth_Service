@@ -110,6 +110,22 @@ public class UserService {
         }
     }
 
+    @KafkaListener(topics = "user_details_topic", groupId = "hotel_ml_auth_service")
+    private void userDetails(String message) throws UserNotFoundException {
+        try {
+            JSONObject json = decodeMessage(message);
+            String messageId = json.optString("messageId");
+            UserDto userDto = Instance.mapUserToUserDto(userRepository.findUserByEmail(json.optString("email")));
+            userDto.setPassword("");
+            JSONObject userDetailsJson = new JSONObject(userDto);
+            logger.info("Data was sent!");
+            logger.severe(userDetailsJson.toString());
+            sendEncodedMessage(userDetailsJson.toString(), messageId, "user_details_request_topic");
+        } catch (Exception e) {
+            logger.severe("Error while saving user: " + e.getMessage());
+        }
+    }
+
     private String sendEncodedMessage(String message, String messageId, String topic) {
         JSONObject json = new JSONObject();
         json.put("messageId", messageId);

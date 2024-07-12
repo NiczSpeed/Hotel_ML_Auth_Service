@@ -32,4 +32,12 @@ public class KafkaTopicsConfiguration {
                 .build();
     }
 
+    @Bean
+    public NewTopic userDetailsRequestTopic(){
+        return TopicBuilder.name("user_details_request_topic")
+                .partitions(12)
+                .replicas(3)
+                .build();
+    }
+
 }

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -78,7 +79,7 @@ public class UserService {
                 logger.info("User already exists!");
                 sendRequestMessage("User already Exist!!", messageId, "error_request_topic");
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.severe("Error while saving user: " + e.getMessage());
         }
     }
@@ -92,23 +93,31 @@ public class UserService {
     @KafkaListener(topics = "login_topic", groupId = "hotel_ml_auth_service")
     private void login(String message) throws UserNotFoundException {
         JSONObject json = decodeMessage(message);
+        String messageId = json.optString("messageId");
         UserDto userDto = new UserDto();
         userDto.setEmail(json.optString("email"));
         userDto.setPassword(json.optString("password"));
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDto.getEmail(), userDto.getPassword()));
-            String token = generateJwtToken(userDto.getEmail());
-            sendJwtToken(token);
+            if (isUserAuthenticated(userDto.getEmail(), userDto.getPassword())) {
+                String token = generateJwtToken(userDto.getEmail());
+                sendEncodedMessage(token, messageId, "jwt_topic");
+                logger.info("User successfully logged in, token was send!");
+            } else {
+                sendRequestMessage("Invalid username or password!", messageId, "error_request_topic");
+            }
         } catch (Exception e) {
-            sendJwtToken("Invalid username or password");
+            logger.severe("Error while saving user: " + e.getMessage());
         }
     }
 
-    private String sendJwtToken(String message) {
-        CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send("jwt_topic", Base64.getEncoder().encodeToString(message.getBytes()));
+    private String sendEncodedMessage(String message, String messageId, String topic) {
+        JSONObject json = new JSONObject();
+        json.put("messageId", messageId);
+        json.put("message", message);
+        CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, Base64.getEncoder().encodeToString(json.toString().getBytes()));
         future.whenComplete((result, exception) -> {
             if (exception != null) logger.severe(exception.getMessage());
-            else logger.info("Message sent successfully");
+            else logger.info("Message send successfully!");
         });
         return message;
     }
@@ -148,6 +157,16 @@ public class UserService {
         return message;
     }
 
+    private boolean isUserAuthenticated(String email, String password) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+            return authentication.isAuthenticated();
+        } catch (Exception e) {
+            return false;
+        }
+
+
+    }
 
 
 }

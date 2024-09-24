@@ -27,8 +27,6 @@ public class User {
     @Column(name = "CreationDate")
     private LocalDate creationDate;
     @ManyToMany(fetch = FetchType.EAGER)
-//    @Cascade({org.hibernate.annotations.CascadeType.PERSIST, org.hibernate.annotations.CascadeType.MERGE})
-
     @JoinTable
     (
         name = "USERS_ROLE",

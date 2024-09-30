@@ -1,6 +1,8 @@
 package com.ml.hotel_ml_auth_service.service;
 
+import com.ml.hotel_ml_auth_service.dto.ResetTokenDto;
 import com.ml.hotel_ml_auth_service.dto.UserDto;
+import com.ml.hotel_ml_auth_service.exception.ResetTokenNotFoundException;
 import com.ml.hotel_ml_auth_service.exception.UserNotFoundException;
 import com.ml.hotel_ml_auth_service.mapper.RoleMapper;
 import com.ml.hotel_ml_auth_service.model.User;
@@ -8,15 +10,20 @@ import com.ml.hotel_ml_auth_service.repository.RoleRepository;
 import com.ml.hotel_ml_auth_service.repository.UserRepository;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -29,8 +36,12 @@ public class UserService {
 
 
     private final AuthenticationManager authenticationManager;
+    private final JavaMailSenderImpl mailSender;
 
     Logger logger = Logger.getLogger(getClass().getName());
+
+    @Value(value = "${spring.mail.username}")
+    private String senderMail;
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -40,13 +51,14 @@ public class UserService {
 
 
     @Autowired
-    public UserService(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository, KafkaTemplate kafkaTemplate, JwtGeneratorService jwtGeneratorService) {
+    public UserService(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository, KafkaTemplate kafkaTemplate, JwtGeneratorService jwtGeneratorService, JavaMailSenderImpl mailSender) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
         this.kafkaTemplate = kafkaTemplate;
         this.jwtGeneratorService = jwtGeneratorService;
+        this.mailSender = mailSender;
     }
 
     public List<User> getSomeUserDetails() {
@@ -103,6 +115,21 @@ public class UserService {
         }
     }
 
+    @KafkaListener(topics = "reset_password_request_topic", groupId = "hotel_ml_auth_service")
+    private void resetPassword(String message) throws ResetTokenNotFoundException {
+        JSONObject json = decodeMessage(message);
+        logger.severe(String.valueOf(userRepository.findByEmail(json.optString("email")).isPresent()));
+        if(userRepository.findByEmail(json.optString("email")).isPresent()) {
+            ResetTokenDto resetTokenDto = ResetTokenDto.builder()
+                    .email(json.optString("email"))
+                    .expiration(LocalDateTime.now().plusMinutes(30))
+                    .token(generateResetPasswordToken())
+                    .build();
+
+            sendMail(resetTokenDto.getEmail(), "Reset Password Token", "Here is your token: " + resetTokenDto.getToken());
+        }
+    }
+
     @KafkaListener(topics = "user_details_topic", groupId = "hotel_ml_auth_service")
     private void userDetails(String message) throws UserNotFoundException {
         try {
@@ -112,7 +139,6 @@ public class UserService {
             userDto.setPassword("");
             JSONObject userDetailsJson = new JSONObject(userDto);
             logger.info("Data was sent!");
-            logger.severe(userDetailsJson.toString());
             sendEncodedMessage(userDetailsJson.toString(), messageId, "user_details_request_topic");
         } catch (Exception e) {
             logger.severe("Error while saving user: " + e.getMessage());
@@ -131,8 +157,25 @@ public class UserService {
         return message;
     }
 
+    private void sendMail(String recipient, String subject, String message){
+
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(recipient);
+        mailMessage.setSubject(subject);
+        mailMessage.setText(message);
+        mailMessage.setFrom(senderMail);
+
+        mailSender.send(mailMessage);
+    }
+
     private String generateJwtToken(String email) {
         return jwtGeneratorService.generateToken(email);
+    }
+
+    private String generateResetPasswordToken() {
+        SecureRandom random = new SecureRandom();
+        int token = random.nextInt(900000) + 100000;
+        return String.valueOf(token);
     }
 
     private void validateJwtToken(String jwtToken) {

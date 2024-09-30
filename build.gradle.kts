@@ -12,6 +12,7 @@ val junitJupiterVersion = "5.10.2"
 val instancioVersion = "4.4.0"
 val jwtVersion = "0.12.5"
 val jsonVersion = "20240303"
+val springMailVersion = "3.3.3"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_21
@@ -41,6 +42,7 @@ tasks.test {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-rest")
 //	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+	implementation("org.springframework.boot:spring-boot-starter-mail:${springMailVersion}")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.apache.kafka:kafka-streams")

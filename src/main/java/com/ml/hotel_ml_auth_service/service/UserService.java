@@ -1,11 +1,16 @@
 package com.ml.hotel_ml_auth_service.service;
 
+import com.ml.hotel_ml_auth_service.dto.GrantAdminLogDto;
 import com.ml.hotel_ml_auth_service.dto.UserDto;
 import com.ml.hotel_ml_auth_service.exception.UserNotFoundException;
+import com.ml.hotel_ml_auth_service.mapper.GrantAdminLogMapper;
 import com.ml.hotel_ml_auth_service.mapper.RoleMapper;
+import com.ml.hotel_ml_auth_service.model.GrantAdminLog;
 import com.ml.hotel_ml_auth_service.model.User;
+import com.ml.hotel_ml_auth_service.repository.GrantAdminLogRepository;
 import com.ml.hotel_ml_auth_service.repository.RoleRepository;
 import com.ml.hotel_ml_auth_service.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -25,6 +30,7 @@ import java.util.logging.Logger;
 import static com.ml.hotel_ml_auth_service.mapper.UserMapper.Instance;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
 
@@ -37,17 +43,7 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final KafkaTemplate kafkaTemplate;
     private final JwtGeneratorService jwtGeneratorService;
-
-
-    @Autowired
-    public UserService(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository, KafkaTemplate kafkaTemplate, JwtGeneratorService jwtGeneratorService) {
-        this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.roleRepository = roleRepository;
-        this.kafkaTemplate = kafkaTemplate;
-        this.jwtGeneratorService = jwtGeneratorService;
-    }
+    private final GrantAdminLogRepository grantAdminLogRepository;
 
     public List<User> getSomeUserDetails() {
         return userRepository.findAll();
@@ -85,18 +81,47 @@ public class UserService {
 
     @KafkaListener(topics = "login_topic", groupId = "hotel_ml_auth_service")
     private void login(String message) throws UserNotFoundException {
-        JSONObject json = decodeMessage(message);
-        String messageId = json.optString("messageId");
-        UserDto userDto = new UserDto();
-        userDto.setEmail(json.optString("email"));
-        userDto.setPassword(json.optString("password"));
         try {
+            JSONObject json = decodeMessage(message);
+            String messageId = json.optString("messageId");
+            UserDto userDto = new UserDto();
+            userDto.setEmail(json.optString("email"));
+            userDto.setPassword(json.optString("password"));
             if (isUserAuthenticated(userDto.getEmail(), userDto.getPassword())) {
                 String token = generateJwtToken(userDto.getEmail());
                 sendEncodedMessage(token, messageId, "jwt_topic");
                 logger.info("User successfully logged in, token was send!");
             } else {
                 sendRequestMessage("Invalid username or password!", messageId, "error_request_topic");
+            }
+        } catch (Exception e) {
+            logger.severe("Error while saving user: " + e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "grant_admin_topic", groupId = "hotel_ml_auth_service")
+    private void grantAdmin(String message) throws UserNotFoundException {
+        try {
+            JSONObject json = decodeMessage(message);
+            String messageId = json.optString("messageId");
+            User grantee = userRepository.findUserByEmail(json.optString("granteeEmail"));
+            if (grantee == null) {
+                sendRequestMessage("Error:User with such an email address does not exist!", messageId, "error_request_topic");
+                logger.severe("User with such an email address does not exist!");
+            } else if (grantee.getRoles().stream().anyMatch(role -> role.getName().equals("ADMIN"))) {
+                sendRequestMessage("Error:User already has Admin role!", messageId, "error_request_topic");
+                logger.severe("User already has Admin role!");
+            } else {
+                grantee.setRoles(roleRepository.findByName("ADMIN"));
+                userRepository.save(grantee);
+                GrantAdminLogDto grantAdminLogDto = GrantAdminLogDto.builder()
+                        .grantor(json.optString("grantorEmail"))
+                        .grantee(json.optString("granteeEmail"))
+                        .build();
+                GrantAdminLog grantAdminLog = GrantAdminLogMapper.Instance.mapGrantAdminLogDtoToGrantAdminLog(grantAdminLogDto);
+                grantAdminLogRepository.save(grantAdminLog);
+                sendRequestMessage("Admin role was successfully granted!", messageId, "success_request_topic");
+                logger.info("Admin role was successfully granted!");
             }
         } catch (Exception e) {
             logger.severe("Error while saving user: " + e.getMessage());

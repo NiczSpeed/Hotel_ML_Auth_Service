@@ -40,4 +40,12 @@ public class KafkaTopicsConfiguration {
                 .build();
     }
 
+    @Bean
+    public NewTopic grantAdminTopic(){
+        return TopicBuilder.name("grant_admin_topic")
+                .partitions(12)
+                .replicas(3)
+                .build();
+    }
+
 }

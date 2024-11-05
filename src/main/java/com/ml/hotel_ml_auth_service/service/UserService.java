@@ -2,6 +2,7 @@ package com.ml.hotel_ml_auth_service.service;
 
 import com.ml.hotel_ml_auth_service.dto.GrantAdminLogDto;
 import com.ml.hotel_ml_auth_service.dto.UserDto;
+import com.ml.hotel_ml_auth_service.dto.UserResponseDetailsDto;
 import com.ml.hotel_ml_auth_service.exception.UserNotFoundException;
 import com.ml.hotel_ml_auth_service.mapper.GrantAdminLogMapper;
 import com.ml.hotel_ml_auth_service.mapper.RoleMapper;
@@ -12,7 +13,6 @@ import com.ml.hotel_ml_auth_service.repository.RoleRepository;
 import com.ml.hotel_ml_auth_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -44,10 +44,6 @@ public class UserService {
     private final KafkaTemplate kafkaTemplate;
     private final JwtGeneratorService jwtGeneratorService;
     private final GrantAdminLogRepository grantAdminLogRepository;
-
-    public List<User> getSomeUserDetails() {
-        return userRepository.findAll();
-    }
 
     @KafkaListener(topics = "register_topic", groupId = "hotel_ml_auth_service")
     private void saveUser(String message) {
@@ -133,11 +129,11 @@ public class UserService {
         try {
             JSONObject json = decodeMessage(message);
             String messageId = json.optString("messageId");
-            UserDto userDto = Instance.mapUserToUserDto(userRepository.findUserByEmail(json.optString("email")));
-            userDto.setPassword("");
-            JSONObject userDetailsJson = new JSONObject(userDto);
-            logger.info("Data was sent!");
+            User user = userRepository.findUserByEmail(json.optString("email"));
+            UserResponseDetailsDto userResponseDetailsDto = Instance.mapUserToUserResponseDetailsDto(user);
+            JSONObject userDetailsJson = new JSONObject(userResponseDetailsDto);
             logger.severe(userDetailsJson.toString());
+            logger.info("Data was sent!");
             sendEncodedMessage(userDetailsJson.toString(), messageId, "user_details_request_topic");
         } catch (Exception e) {
             logger.severe("Error while saving user: " + e.getMessage());
@@ -147,7 +143,13 @@ public class UserService {
     private String sendEncodedMessage(String message, String messageId, String topic) {
         JSONObject json = new JSONObject();
         json.put("messageId", messageId);
-        json.put("message", message);
+        if(message.contains("{")){
+            JSONObject messageJson = new JSONObject(message);
+            json.put("message", messageJson);
+        }
+        else {
+            json.put("message", message);
+        }
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, Base64.getEncoder().encodeToString(json.toString().getBytes()));
         future.whenComplete((result, exception) -> {
             if (exception != null) logger.severe(exception.getMessage());

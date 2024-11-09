@@ -27,12 +27,6 @@ repositories {
 	mavenCentral()
 }
 
-tasks.jar {
-	manifest {
-		archiveFileName.set("${project.name}-${project.version}.jar")
-	}
-}
-
 tasks.test {
 	useJUnitPlatform()
 }

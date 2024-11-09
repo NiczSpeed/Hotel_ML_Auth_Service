@@ -1,13 +1,18 @@
 package com.ml.hotel_ml_auth_service.service;
 
+import com.ml.hotel_ml_auth_service.dto.GrantAdminLogDto;
 import com.ml.hotel_ml_auth_service.dto.UserDto;
+import com.ml.hotel_ml_auth_service.dto.UserResponseDetailsDto;
 import com.ml.hotel_ml_auth_service.exception.UserNotFoundException;
+import com.ml.hotel_ml_auth_service.mapper.GrantAdminLogMapper;
 import com.ml.hotel_ml_auth_service.mapper.RoleMapper;
+import com.ml.hotel_ml_auth_service.model.GrantAdminLog;
 import com.ml.hotel_ml_auth_service.model.User;
+import com.ml.hotel_ml_auth_service.repository.GrantAdminLogRepository;
 import com.ml.hotel_ml_auth_service.repository.RoleRepository;
 import com.ml.hotel_ml_auth_service.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -25,6 +30,7 @@ import java.util.logging.Logger;
 import static com.ml.hotel_ml_auth_service.mapper.UserMapper.Instance;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
 
@@ -37,21 +43,7 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final KafkaTemplate kafkaTemplate;
     private final JwtGeneratorService jwtGeneratorService;
-
-
-    @Autowired
-    public UserService(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository, KafkaTemplate kafkaTemplate, JwtGeneratorService jwtGeneratorService) {
-        this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.roleRepository = roleRepository;
-        this.kafkaTemplate = kafkaTemplate;
-        this.jwtGeneratorService = jwtGeneratorService;
-    }
-
-    public List<User> getSomeUserDetails() {
-        return userRepository.findAll();
-    }
+    private final GrantAdminLogRepository grantAdminLogRepository;
 
     @KafkaListener(topics = "register_topic", groupId = "hotel_ml_auth_service")
     private void saveUser(String message) {
@@ -85,12 +77,12 @@ public class UserService {
 
     @KafkaListener(topics = "login_topic", groupId = "hotel_ml_auth_service")
     private void login(String message) throws UserNotFoundException {
-        JSONObject json = decodeMessage(message);
-        String messageId = json.optString("messageId");
-        UserDto userDto = new UserDto();
-        userDto.setEmail(json.optString("email"));
-        userDto.setPassword(json.optString("password"));
         try {
+            JSONObject json = decodeMessage(message);
+            String messageId = json.optString("messageId");
+            UserDto userDto = new UserDto();
+            userDto.setEmail(json.optString("email"));
+            userDto.setPassword(json.optString("password"));
             if (isUserAuthenticated(userDto.getEmail(), userDto.getPassword())) {
                 String token = generateJwtToken(userDto.getEmail());
                 sendEncodedMessage(token, messageId, "jwt_topic");
@@ -103,16 +95,45 @@ public class UserService {
         }
     }
 
+    @KafkaListener(topics = "grant_admin_topic", groupId = "hotel_ml_auth_service")
+    private void grantAdmin(String message) throws UserNotFoundException {
+        try {
+            JSONObject json = decodeMessage(message);
+            String messageId = json.optString("messageId");
+            User grantee = userRepository.findUserByEmail(json.optString("granteeEmail"));
+            if (grantee == null) {
+                sendRequestMessage("Error:User with such an email address does not exist!", messageId, "error_request_topic");
+                logger.severe("User with such an email address does not exist!");
+            } else if (grantee.getRoles().stream().anyMatch(role -> role.getName().equals("ADMIN"))) {
+                sendRequestMessage("Error:User already has Admin role!", messageId, "error_request_topic");
+                logger.severe("User already has Admin role!");
+            } else {
+                grantee.setRoles(roleRepository.findByName("ADMIN"));
+                userRepository.save(grantee);
+                GrantAdminLogDto grantAdminLogDto = GrantAdminLogDto.builder()
+                        .grantor(json.optString("grantorEmail"))
+                        .grantee(json.optString("granteeEmail"))
+                        .build();
+                GrantAdminLog grantAdminLog = GrantAdminLogMapper.Instance.mapGrantAdminLogDtoToGrantAdminLog(grantAdminLogDto);
+                grantAdminLogRepository.save(grantAdminLog);
+                sendRequestMessage("Admin role was successfully granted!", messageId, "success_request_topic");
+                logger.info("Admin role was successfully granted!");
+            }
+        } catch (Exception e) {
+            logger.severe("Error while saving user: " + e.getMessage());
+        }
+    }
+
     @KafkaListener(topics = "user_details_topic", groupId = "hotel_ml_auth_service")
     private void userDetails(String message) throws UserNotFoundException {
         try {
             JSONObject json = decodeMessage(message);
             String messageId = json.optString("messageId");
-            UserDto userDto = Instance.mapUserToUserDto(userRepository.findUserByEmail(json.optString("email")));
-            userDto.setPassword("");
-            JSONObject userDetailsJson = new JSONObject(userDto);
-            logger.info("Data was sent!");
+            User user = userRepository.findUserByEmail(json.optString("email"));
+            UserResponseDetailsDto userResponseDetailsDto = Instance.mapUserToUserResponseDetailsDto(user);
+            JSONObject userDetailsJson = new JSONObject(userResponseDetailsDto);
             logger.severe(userDetailsJson.toString());
+            logger.info("Data was sent!");
             sendEncodedMessage(userDetailsJson.toString(), messageId, "user_details_request_topic");
         } catch (Exception e) {
             logger.severe("Error while saving user: " + e.getMessage());
@@ -122,7 +143,13 @@ public class UserService {
     private String sendEncodedMessage(String message, String messageId, String topic) {
         JSONObject json = new JSONObject();
         json.put("messageId", messageId);
-        json.put("message", message);
+        if(message.contains("{")){
+            JSONObject messageJson = new JSONObject(message);
+            json.put("message", messageJson);
+        }
+        else {
+            json.put("message", message);
+        }
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, Base64.getEncoder().encodeToString(json.toString().getBytes()));
         future.whenComplete((result, exception) -> {
             if (exception != null) logger.severe(exception.getMessage());

@@ -12,7 +12,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @ToString(exclude = {"roles"})
-@Table(name = "PRIVILEGE")
+@Table(name = "PRIVILEGES")
 public class Privilege {
 
     @Id

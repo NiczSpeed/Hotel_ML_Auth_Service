@@ -1,4 +1,4 @@
-INSERT INTO privilege (uuid, name)
+INSERT INTO privileges (uuid, name)
 values ('260debd2-93fb-4e0e-8815-78d9eb98d196', 'READ'),
        ('996928fb-f256-40d5-918f-4637bd1ae042', 'WRITE')
 on conflict DO NOTHING;

@@ -6,6 +6,7 @@ import com.ml.hotel_ml_auth_service.mapper.PrivilegeMapper;
 import com.ml.hotel_ml_auth_service.model.Privilege;
 import com.ml.hotel_ml_auth_service.repository.PrivilegeRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,8 @@ public class PrivilegeService {
 
     @Transactional
     public Privilege findByName(String name) {
-        return privilegeRepository.findByName(name).orElseThrow(PrivilegeNotExistException::new);
+        Privilege privilege = privilegeRepository.findByName(name).orElseThrow(PrivilegeNotExistException::new);
+        Hibernate.initialize(privilege.getRoles());
+        return privilege;
     }
 }

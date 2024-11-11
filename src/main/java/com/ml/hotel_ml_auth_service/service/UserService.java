@@ -3,13 +3,14 @@ package com.ml.hotel_ml_auth_service.service;
 import com.ml.hotel_ml_auth_service.dto.GrantAdminLogDto;
 import com.ml.hotel_ml_auth_service.dto.UserDto;
 import com.ml.hotel_ml_auth_service.dto.UserResponseDetailsDto;
+import com.ml.hotel_ml_auth_service.exception.ErrorWhileLogin;
 import com.ml.hotel_ml_auth_service.exception.UserNotFoundException;
 import com.ml.hotel_ml_auth_service.mapper.GrantAdminLogMapper;
 import com.ml.hotel_ml_auth_service.mapper.RoleMapper;
+import com.ml.hotel_ml_auth_service.mapper.UserMapper;
 import com.ml.hotel_ml_auth_service.model.GrantAdminLog;
 import com.ml.hotel_ml_auth_service.model.User;
 import com.ml.hotel_ml_auth_service.repository.GrantAdminLogRepository;
-import com.ml.hotel_ml_auth_service.repository.RoleRepository;
 import com.ml.hotel_ml_auth_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
@@ -22,8 +23,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Base64;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
@@ -54,18 +55,18 @@ public class UserService {
             String email = json.optString("email");
 
             if (!userRepository.findAll().stream().anyMatch(user -> email.equals(user.getEmail()))) {
-//                UserDto userDto = new UserDto();
-//                userDto.setEmail(json.optString("email"));
-//                userDto.setPassword(json.optString("password"));
-//                userDto.setFirstName(json.optString("firstName"));
-//                userDto.setLastName(json.optString("lastName"));
                 UserDto userDto = UserDto.builder()
                         .email(json.optString("email"))
-                        .password(json.optString("password"))
+                        .creationDate(LocalDate.now())
+                        .isEnabled(true)
+                        .isAccountNonExpired(true)
+                        .password(passwordEncoder.encode(json.optString("password")))
+                        .roles(RoleMapper.Instance.mapRoleSetToRoleDtoSet((Set.of(roleService.findRoleByName("USER")))))
                         .firstName(json.optString("firstName"))
                         .lastName(json.optString("lastName"))
                         .build();
-                save(userDto);
+                User user = Instance.mapUserDtoToUser(userDto);
+                userRepository.save(user);
                 logger.info("User saved: " + userDto);
                 sendRequestMessage("User Successfully added!", messageId, "success_request_topic");
             } else {
@@ -77,24 +78,15 @@ public class UserService {
         }
     }
 
-    public User save(UserDto userDto) {
-        userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        userDto.setRoles(RoleMapper.Instance.mapRoleSetToRoleDtoSet((Set.of(roleService.findRoleByName("USER")))));
-        return userRepository.save(Instance.mapUserDtoToUser(userDto));
-    }
-
     @KafkaListener(topics = "login_topic", groupId = "hotel_ml_auth_service")
     private void login(String message) throws UserNotFoundException {
         try {
             JSONObject json = decodeMessage(message);
             String messageId = json.optString("messageId");
-//            UserDto userDto = new UserDto();
             UserDto userDto = UserDto.builder()
                     .email(json.optString("email"))
                     .password(json.optString("password"))
                     .build();
-            userDto.setEmail(json.optString("email"));
-            userDto.setPassword(json.optString("password"));
             if (isUserAuthenticated(userDto.getEmail(), userDto.getPassword())) {
                 String token = generateJwtToken(userDto.getEmail());
                 sendEncodedMessage(token, messageId, "jwt_topic");
@@ -103,7 +95,7 @@ public class UserService {
                 sendRequestMessage("Invalid username or password!", messageId, "error_request_topic");
             }
         } catch (Exception e) {
-            logger.severe("Error while saving user: " + e.getMessage());
+            logger.severe("Error while login user: " + e.getMessage());
         }
     }
 
@@ -217,6 +209,10 @@ public class UserService {
 
 //    public User findByEmail(String email) {
 //        return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+//    }
+//
+//    public User findUserByEmailAndPassword(String email, String password){
+//        return userRepository.findUserByEmailAndPassword(email, password).orElseThrow(ErrorWhileLogin::new);
 //    }
 
 }

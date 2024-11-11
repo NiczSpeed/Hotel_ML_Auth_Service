@@ -1,41 +1,35 @@
 package com.ml.hotel_ml_auth_service.service;
 
-import com.ml.hotel_ml_auth_service.dto.PrivilegeDto;
-import com.ml.hotel_ml_auth_service.exception.ErrorWhileEncodeException;
 import com.ml.hotel_ml_auth_service.exception.ErrorWhileSavePrivileges;
 import com.ml.hotel_ml_auth_service.exception.ErrorWhileSaveRoles;
 import com.ml.hotel_ml_auth_service.exception.ErrorWhileSaveUser;
-import com.ml.hotel_ml_auth_service.mapper.PrivilegeMapper;
 import com.ml.hotel_ml_auth_service.model.Privilege;
 import com.ml.hotel_ml_auth_service.model.Role;
 import com.ml.hotel_ml_auth_service.model.User;
 import com.ml.hotel_ml_auth_service.repository.PrivilegeRepository;
 import com.ml.hotel_ml_auth_service.repository.RoleRepository;
 import com.ml.hotel_ml_auth_service.repository.UserRepository;
-import com.ml.hotel_ml_auth_service.utils.Encryptor;
-import com.ml.hotel_ml_auth_service.utils.EncryptorUtil;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.event.EventListener;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
 @Service
 @RequiredArgsConstructor
-public class EncryptorService {
+public class InitDataService {
 
+    private final PasswordEncoder passwordEncoder;
     private final PrivilegeRepository privilegeRepository;
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PrivilegeService privilegeService;
     private final RoleService roleService;
-    private final UserService userService;
 
     Logger logger = Logger.getLogger(getClass().getName());
 
@@ -52,7 +46,8 @@ public class EncryptorService {
 
     }
 
-    private void initPrivileges() {
+    @Transactional
+    protected void initPrivileges() {
         if (privilegeRepository.count() == 0) {
             Privilege readPrivilege = Privilege.builder()
                     .name("READ")
@@ -63,8 +58,8 @@ public class EncryptorService {
             privilegeRepository.saveAll(List.of(readPrivilege, writePrivilege));
         }
     }
-
-    private void initRoles() {
+    @Transactional
+    protected void initRoles() {
         if (roleRepository.count() == 0) {
             Role userRole = Role.builder()
                     .name("USER")
@@ -87,15 +82,11 @@ public class EncryptorService {
                     .isAccountNonExpired(true)
                     .firstName("admin")
                     .lastName("admin")
-                    .password("niczspeed")
+                    .password(passwordEncoder.encode("niczspeed"))
                     .roles(Set.of(roleService.findRoleByName("ADMIN")))
                     .build();
             userRepository.save(admin);
         }
     }
-
-//    private<T> boolean checkIfExist (T object){
-//
-//    }
 
 }

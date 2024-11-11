@@ -30,7 +30,7 @@ public class Role {
     private Set<User> users;
 
     @Column(name = "privileges")
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable
     (
         name = "ROLES_PRIVILEGES",

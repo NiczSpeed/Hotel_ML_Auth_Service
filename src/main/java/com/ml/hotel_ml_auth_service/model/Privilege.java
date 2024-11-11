@@ -1,5 +1,6 @@
 package com.ml.hotel_ml_auth_service.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ml.hotel_ml_auth_service.utils.converters.StringConverter;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,7 +27,7 @@ public class Privilege {
     private String name;
 
     @Column(name = "roles")
-    @ManyToMany(mappedBy = "privileges", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "privileges", fetch = FetchType.LAZY)
     private Set<Role> roles;
 
 }

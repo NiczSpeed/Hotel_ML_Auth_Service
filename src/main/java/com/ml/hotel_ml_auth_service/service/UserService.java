@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
@@ -35,12 +36,12 @@ public class UserService {
 
 
     private final AuthenticationManager authenticationManager;
+    private final RoleService roleService;
 
     Logger logger = Logger.getLogger(getClass().getName());
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RoleRepository roleRepository;
     private final KafkaTemplate kafkaTemplate;
     private final JwtGeneratorService jwtGeneratorService;
     private final GrantAdminLogRepository grantAdminLogRepository;
@@ -52,11 +53,17 @@ public class UserService {
             String messageId = json.optString("messageId");
 
             if (!checkIfUserExists(json.optString("email"))) {
-                UserDto userDto = new UserDto();
-                userDto.setEmail(json.optString("email"));
-                userDto.setPassword(json.optString("password"));
-                userDto.setFirstName(json.optString("firstName"));
-                userDto.setLastName(json.optString("lastName"));
+//                UserDto userDto = new UserDto();
+//                userDto.setEmail(json.optString("email"));
+//                userDto.setPassword(json.optString("password"));
+//                userDto.setFirstName(json.optString("firstName"));
+//                userDto.setLastName(json.optString("lastName"));
+                UserDto userDto = UserDto.builder()
+                        .email(json.optString("email"))
+                        .password(json.optString("password"))
+                        .firstName(json.optString("firstName"))
+                        .lastName(json.optString("lastName"))
+                        .build();
                 save(userDto);
                 logger.info("User saved: " + userDto);
                 sendRequestMessage("User Successfully added!", messageId, "success_request_topic");
@@ -71,7 +78,7 @@ public class UserService {
 
     public User save(UserDto userDto) {
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        userDto.setRoles(RoleMapper.Instance.mapRoleSetToRoleDtoSet((roleRepository.findByName("USER"))));
+        userDto.setRoles(RoleMapper.Instance.mapRoleSetToRoleDtoSet((Set.of(roleService.findRoleByName("USER")))));
         return userRepository.save(Instance.mapUserDtoToUser(userDto));
     }
 
@@ -80,7 +87,11 @@ public class UserService {
         try {
             JSONObject json = decodeMessage(message);
             String messageId = json.optString("messageId");
-            UserDto userDto = new UserDto();
+//            UserDto userDto = new UserDto();
+            UserDto userDto = UserDto.builder()
+                    .email(json.optString("email"))
+                    .password(json.optString("password"))
+                    .build();
             userDto.setEmail(json.optString("email"));
             userDto.setPassword(json.optString("password"));
             if (isUserAuthenticated(userDto.getEmail(), userDto.getPassword())) {
@@ -108,7 +119,7 @@ public class UserService {
                 sendRequestMessage("Error:User already has Admin role!", messageId, "error_request_topic");
                 logger.severe("User already has Admin role!");
             } else {
-                grantee.setRoles(roleRepository.findByName("ADMIN"));
+                grantee.setRoles(Set.of(roleService.findRoleByName("ADMIN")));
                 userRepository.save(grantee);
                 GrantAdminLogDto grantAdminLogDto = GrantAdminLogDto.builder()
                         .grantor(json.optString("grantorEmail"))
@@ -143,11 +154,10 @@ public class UserService {
     private String sendEncodedMessage(String message, String messageId, String topic) {
         JSONObject json = new JSONObject();
         json.put("messageId", messageId);
-        if(message.contains("{")){
+        if (message.contains("{")) {
             JSONObject messageJson = new JSONObject(message);
             json.put("message", messageJson);
-        }
-        else {
+        } else {
             json.put("message", message);
         }
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, Base64.getEncoder().encodeToString(json.toString().getBytes()));
@@ -204,5 +214,8 @@ public class UserService {
 
     }
 
+//    public User findByEmail(String email) {
+//        return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+//    }
 
 }

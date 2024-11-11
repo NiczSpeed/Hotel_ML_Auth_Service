@@ -12,6 +12,7 @@ val junitJupiterVersion = "5.10.2"
 val instancioVersion = "4.4.0"
 val jwtVersion = "0.12.5"
 val jsonVersion = "20240303"
+val jacksonVersion = "2.17.2"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_21
@@ -45,6 +46,10 @@ dependencies {
 	implementation("io.jsonwebtoken:jjwt-impl:${jwtVersion}")
 	implementation("io.jsonwebtoken:jjwt-jackson:${jwtVersion}")
 	implementation("org.json:json:${jsonVersion}")
+	implementation ("com.fasterxml.jackson.core:jackson-core:${jacksonVersion}")
+	implementation ("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
+	implementation ("com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}")
+	implementation ("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}")
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 //	runtimeOnly("com.h2database:h2")

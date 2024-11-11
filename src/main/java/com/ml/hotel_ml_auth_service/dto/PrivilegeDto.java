@@ -5,6 +5,7 @@ import lombok.*;
 
 
 @Data
+@Builder
 public class PrivilegeDto {
     private String name;
 }

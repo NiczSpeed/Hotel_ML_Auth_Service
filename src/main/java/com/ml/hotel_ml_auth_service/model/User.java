@@ -1,5 +1,7 @@
 package com.ml.hotel_ml_auth_service.model;
 
+import com.ml.hotel_ml_auth_service.utils.converters.LocalDateConverter;
+import com.ml.hotel_ml_auth_service.utils.converters.StringConverter;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,8 +10,8 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity(name = "users")
-@Getter
-@Setter
+@Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = {"roles"})
@@ -20,12 +22,19 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "uuid")
     private UUID uuid;
+
     @Column(name = "email")
+    @Convert(converter = StringConverter.class)
     private String email;
+
     @Column(name = "password")
+    @Convert(converter = StringConverter.class)
     private String password;
+
     @Column(name = "CreationDate")
+    @Convert(converter = LocalDateConverter.class)
     private LocalDate creationDate;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable
     (
@@ -34,12 +43,18 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "role_uuid")
     )
     private Set<Role> roles;
+
     @Column(name = "firstName")
+    @Convert(converter = StringConverter.class)
     private String firstName;
+
     @Column(name = "lastName")
+    @Convert(converter = StringConverter.class)
     private String lastName;
+
     @Column(name = "isAccountNonExpired")
     private boolean isAccountNonExpired;
+
     @Column(name = "isEnabled")
     private boolean isEnabled;
 }

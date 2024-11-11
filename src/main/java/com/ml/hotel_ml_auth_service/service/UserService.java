@@ -51,8 +51,9 @@ public class UserService {
         try {
             JSONObject json = decodeMessage(message);
             String messageId = json.optString("messageId");
+            String email = json.optString("email");
 
-            if (!checkIfUserExists(json.optString("email"))) {
+            if (!userRepository.findAll().stream().anyMatch(user -> email.equals(user.getEmail()))) {
 //                UserDto userDto = new UserDto();
 //                userDto.setEmail(json.optString("email"));
 //                userDto.setPassword(json.optString("password"));

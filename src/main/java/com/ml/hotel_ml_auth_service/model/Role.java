@@ -1,3 +1,4 @@
+
 package com.ml.hotel_ml_auth_service.model;
 
 import com.ml.hotel_ml_auth_service.utils.converters.StringConverter;
@@ -8,8 +9,8 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity(name = "roles")
-@Data
 @Builder
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = {"users", "privileges"})
@@ -22,20 +23,20 @@ public class Role {
     private UUID uuid;
 
     @Column(name = "name")
-//    @Convert(converter = StringConverter.class)
+    @Convert(converter = StringConverter.class)
     private String name;
 
     @Column(name = "users")
-    @ManyToMany(mappedBy = "roles", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "roles")
     private Set<User> users;
 
     @Column(name = "privileges")
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable
-    (
-        name = "ROLES_PRIVILEGES",
-        joinColumns = @JoinColumn(name = "role_uuid"),
-        inverseJoinColumns = @JoinColumn(name = "privilege_uuid")
-    )
+            (
+                    name = "ROLES_PRIVILEGES",
+                    joinColumns = @JoinColumn(name = "role_uuid"),
+                    inverseJoinColumns = @JoinColumn(name = "privilege_uuid")
+            )
     private Set<Privilege> privileges;
 }

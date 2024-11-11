@@ -10,8 +10,9 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity(name = "users")
-@Data
+@Getter
 @Builder
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = {"roles"})
@@ -24,33 +25,32 @@ public class User {
     private UUID uuid;
 
     @Column(name = "email")
-//    @Convert(converter = StringConverter.class)
+    @Convert(converter = StringConverter.class)
     private String email;
 
     @Column(name = "password")
-//    @Convert(converter = StringConverter.class)
+    @Convert(converter = StringConverter.class)
     private String password;
 
     @Column(name = "CreationDate")
-//    @Convert(converter = LocalDateConverter.class)
+    @Convert(converter = LocalDateConverter.class)
     private LocalDate creationDate;
 
     @ManyToMany(fetch = FetchType.EAGER)
-//    @Convert(converter = StringConverter.class)
     @JoinTable
-    (
-        name = "USERS_ROLE",
-        joinColumns = @JoinColumn(name = "user_uuid"),
-        inverseJoinColumns = @JoinColumn(name = "role_uuid")
-    )
+            (
+                    name = "USERS_ROLE",
+                    joinColumns = @JoinColumn(name = "user_uuid"),
+                    inverseJoinColumns = @JoinColumn(name = "role_uuid")
+            )
     private Set<Role> roles;
 
     @Column(name = "firstName")
-//    @Convert(converter = StringConverter.class)
+    @Convert(converter = StringConverter.class)
     private String firstName;
 
     @Column(name = "lastName")
-//    @Convert(converter = StringConverter.class)
+    @Convert(converter = StringConverter.class)
     private String lastName;
 
     @Column(name = "isAccountNonExpired")

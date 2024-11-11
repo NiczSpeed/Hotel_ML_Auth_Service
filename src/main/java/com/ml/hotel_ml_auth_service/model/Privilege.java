@@ -1,6 +1,5 @@
 package com.ml.hotel_ml_auth_service.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ml.hotel_ml_auth_service.utils.converters.StringConverter;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,10 +8,10 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity(name = "privileges")
-@Data
+@Getter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @ToString(exclude = {"roles"})
 @Table(name = "PRIVILEGES")
 public class Privilege {
@@ -23,11 +22,11 @@ public class Privilege {
     private UUID uuid;
 
     @Column(name = "name")
-//    @Convert(converter = StringConverter.class)
+    @Convert(converter = StringConverter.class)
     private String name;
 
-//    @Column(name = "roles")
-//    @ManyToMany(mappedBy = "privileges", fetch = FetchType.LAZY)
-//    private Set<Role> roles;
+    @Column(name = "roles")
+    @ManyToMany(mappedBy = "privileges")
+    private Set<Role> roles;
 
 }

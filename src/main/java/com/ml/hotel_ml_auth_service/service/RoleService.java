@@ -17,7 +17,8 @@ public class RoleService {
 
     private final RoleRepository roleRepository;
 
+    @Transactional
     public Role findRoleByName(String name) {
-       return roleRepository.findByName(name).orElseThrow(RoleNotExistException::new);
+        return roleRepository.findByName(name).orElseThrow(RoleNotExistException::new);
     }
 }

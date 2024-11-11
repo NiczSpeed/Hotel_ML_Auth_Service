@@ -12,6 +12,7 @@ import com.ml.hotel_ml_auth_service.model.GrantAdminLog;
 import com.ml.hotel_ml_auth_service.model.User;
 import com.ml.hotel_ml_auth_service.repository.GrantAdminLogRepository;
 import com.ml.hotel_ml_auth_service.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -78,8 +79,9 @@ public class UserService {
         }
     }
 
+
     @KafkaListener(topics = "login_topic", groupId = "hotel_ml_auth_service")
-    private void login(String message) throws UserNotFoundException {
+    protected void login(String message) throws UserNotFoundException {
         try {
             JSONObject json = decodeMessage(message);
             String messageId = json.optString("messageId");

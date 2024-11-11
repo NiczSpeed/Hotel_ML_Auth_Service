@@ -33,13 +33,14 @@ public class InitDataService {
 
     Logger logger = Logger.getLogger(getClass().getName());
 
+
     @PostConstruct
     private void encryptDataInsideDatabase() {
         try {
             initPrivileges();
             initRoles();
             initUsers();
-            logger.severe(userRepository.findAll().toString());
+            init();
         } catch (ErrorWhileSavePrivileges | ErrorWhileSaveRoles | ErrorWhileSaveUser e) {
             logger.warning(e.getMessage());
         }
@@ -59,6 +60,7 @@ public class InitDataService {
             privilegeRepository.saveAll(List.of(readPrivilege, writePrivilege));
         }
     }
+
     @Transactional
     protected void initRoles() {
         if (roleRepository.count() == 0) {
@@ -74,7 +76,8 @@ public class InitDataService {
         }
     }
 
-    private void initUsers() {
+    @Transactional
+    protected void initUsers() {
         if (userRepository.count() == 0) {
             User admin = User.builder()
                     .email("admin@admin.com")
@@ -90,5 +93,9 @@ public class InitDataService {
         }
     }
 
+    @Transactional
+    protected void init() {
+        logger.warning(userRepository.findByEmail("admin@admin.com").get().getRoles().toString());
+    }
 
 }

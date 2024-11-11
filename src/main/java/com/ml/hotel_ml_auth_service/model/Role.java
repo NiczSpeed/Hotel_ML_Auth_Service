@@ -9,6 +9,7 @@ import java.util.UUID;
 @Entity(name = "roles")
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = {"users", "privileges"})

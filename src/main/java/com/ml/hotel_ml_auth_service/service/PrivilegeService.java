@@ -22,4 +22,8 @@ public class PrivilegeService {
        return privilegeRepository.save(PrivilegeMapper.Instance.mapPrivilegeDtoToPrivilege(privilegeDto));
     }
 
+    public Privilege findByName(String name) {
+        return privilegeRepository.findByName(name);
+    }
+
 }

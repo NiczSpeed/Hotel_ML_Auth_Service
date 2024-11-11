@@ -21,5 +21,9 @@ public class RoleService {
        return roleRepository.save(RoleMapper.Instance.mapRoleDtoToRole(roleDto));
     }
 
+    public Role findRoleByName(String name) {
+        return roleRepository.findByName(name);
+    }
+
 
 }

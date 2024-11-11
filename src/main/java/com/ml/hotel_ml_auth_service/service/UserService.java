@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
@@ -71,7 +72,7 @@ public class UserService {
 
     public User save(UserDto userDto) {
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        userDto.setRoles(RoleMapper.Instance.mapRoleSetToRoleDtoSet((roleRepository.findByName("USER"))));
+        userDto.setRoles(RoleMapper.Instance.mapRoleSetToRoleDtoSet(Set.of(roleRepository.findByName("USER"))));
         return userRepository.save(Instance.mapUserDtoToUser(userDto));
     }
 
@@ -108,7 +109,7 @@ public class UserService {
                 sendRequestMessage("Error:User already has Admin role!", messageId, "error_request_topic");
                 logger.severe("User already has Admin role!");
             } else {
-                grantee.setRoles(roleRepository.findByName("ADMIN"));
+                grantee.setRoles(Set.of(roleRepository.findByName("ADMIN")));
                 userRepository.save(grantee);
                 GrantAdminLogDto grantAdminLogDto = GrantAdminLogDto.builder()
                         .grantor(json.optString("grantorEmail"))

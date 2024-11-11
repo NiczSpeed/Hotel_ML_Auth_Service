@@ -24,18 +24,19 @@ public class User {
     private UUID uuid;
 
     @Column(name = "email")
-    @Convert(converter = StringConverter.class)
+//    @Convert(converter = StringConverter.class)
     private String email;
 
     @Column(name = "password")
-    @Convert(converter = StringConverter.class)
+//    @Convert(converter = StringConverter.class)
     private String password;
 
     @Column(name = "CreationDate")
-    @Convert(converter = LocalDateConverter.class)
+//    @Convert(converter = LocalDateConverter.class)
     private LocalDate creationDate;
 
     @ManyToMany(fetch = FetchType.EAGER)
+//    @Convert(converter = StringConverter.class)
     @JoinTable
     (
         name = "USERS_ROLE",
@@ -45,11 +46,11 @@ public class User {
     private Set<Role> roles;
 
     @Column(name = "firstName")
-    @Convert(converter = StringConverter.class)
+//    @Convert(converter = StringConverter.class)
     private String firstName;
 
     @Column(name = "lastName")
-    @Convert(converter = StringConverter.class)
+//    @Convert(converter = StringConverter.class)
     private String lastName;
 
     @Column(name = "isAccountNonExpired")

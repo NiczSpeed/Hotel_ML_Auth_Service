@@ -22,15 +22,15 @@ public class Role {
     private UUID uuid;
 
     @Column(name = "name")
-    @Convert(converter = StringConverter.class)
+//    @Convert(converter = StringConverter.class)
     private String name;
 
     @Column(name = "users")
-    @ManyToMany(mappedBy = "roles")
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.EAGER)
     private Set<User> users;
 
     @Column(name = "privileges")
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable
     (
         name = "ROLES_PRIVILEGES",

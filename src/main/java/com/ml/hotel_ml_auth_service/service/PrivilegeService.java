@@ -18,10 +18,7 @@ public class PrivilegeService {
 
     private final PrivilegeRepository privilegeRepository;
 
-    @Transactional
     public Privilege findByName(String name) {
-        Privilege privilege = privilegeRepository.findByName(name).orElseThrow(PrivilegeNotExistException::new);
-        Hibernate.initialize(privilege.getRoles());
-        return privilege;
+        return privilegeRepository.findByName(name).orElseThrow(PrivilegeNotExistException::new);
     }
 }

@@ -17,11 +17,7 @@ public class RoleService {
 
     private final RoleRepository roleRepository;
 
-    @Transactional
     public Role findRoleByName(String name) {
-        Role role = roleRepository.findByName(name).orElseThrow(RoleNotExistException::new);
-        Hibernate.initialize(role.getUsers());
-        Hibernate.initialize(role.getPrivileges());
-        return role;
+       return roleRepository.findByName(name).orElseThrow(RoleNotExistException::new);
     }
 }

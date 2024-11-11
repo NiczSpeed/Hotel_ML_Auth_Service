@@ -39,6 +39,7 @@ public class InitDataService {
             initPrivileges();
             initRoles();
             initUsers();
+            logger.severe(userRepository.findAll().toString());
         } catch (ErrorWhileSavePrivileges | ErrorWhileSaveRoles | ErrorWhileSaveUser e) {
             logger.warning(e.getMessage());
         }
@@ -88,5 +89,6 @@ public class InitDataService {
             userRepository.save(admin);
         }
     }
+
 
 }

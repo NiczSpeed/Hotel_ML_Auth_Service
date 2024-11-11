@@ -23,11 +23,11 @@ public class Privilege {
     private UUID uuid;
 
     @Column(name = "name")
-    @Convert(converter = StringConverter.class)
+//    @Convert(converter = StringConverter.class)
     private String name;
 
-    @Column(name = "roles")
-    @ManyToMany(mappedBy = "privileges", fetch = FetchType.LAZY)
-    private Set<Role> roles;
+//    @Column(name = "roles")
+//    @ManyToMany(mappedBy = "privileges", fetch = FetchType.LAZY)
+//    private Set<Role> roles;
 
 }

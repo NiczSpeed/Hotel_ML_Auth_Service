@@ -8,6 +8,7 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +35,7 @@ public class JwtGeneratorService implements Serializable {
         return Jwts.parser().verifyWith(getSecretKey()).build().parseSignedClaims(token);
     }
 
+    @Transactional
     public String generateToken(String email) {
         Map<String, Object> claims = new HashMap<>();
         Set<String> roles = new HashSet<>();

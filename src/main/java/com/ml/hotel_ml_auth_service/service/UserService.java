@@ -22,6 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Base64;
 import java.util.List;
 import java.util.Set;
@@ -45,20 +46,28 @@ public class UserService {
     private final KafkaTemplate kafkaTemplate;
     private final JwtGeneratorService jwtGeneratorService;
     private final GrantAdminLogRepository grantAdminLogRepository;
+    private final RoleService roleService;
 
     @KafkaListener(topics = "register_topic", groupId = "hotel_ml_auth_service")
     private void saveUser(String message) {
         try {
             JSONObject json = decodeMessage(message);
             String messageId = json.optString("messageId");
+            String email = json.optString("email");
 
-            if (!checkIfUserExists(json.optString("email"))) {
-                UserDto userDto = new UserDto();
-                userDto.setEmail(json.optString("email"));
-                userDto.setPassword(json.optString("password"));
-                userDto.setFirstName(json.optString("firstName"));
-                userDto.setLastName(json.optString("lastName"));
-                save(userDto);
+            if (!userRepository.findAll().stream().anyMatch(user -> email.equals(user.getEmail()))) {
+                UserDto userDto = UserDto.builder()
+                        .email(json.optString("email"))
+                        .creationDate(LocalDate.now())
+                        .isEnabled(true)
+                        .isAccountNonExpired(true)
+                        .password(passwordEncoder.encode(json.optString("password")))
+                        .roles(RoleMapper.Instance.mapRoleSetToRoleDtoSet((Set.of(roleService.findRoleByName("USER")))))
+                        .firstName(json.optString("firstName"))
+                        .lastName(json.optString("lastName"))
+                        .build();
+                User user = Instance.mapUserDtoToUser(userDto);
+                userRepository.save(user);
                 logger.info("User saved: " + userDto);
                 sendRequestMessage("User Successfully added!", messageId, "success_request_topic");
             } else {

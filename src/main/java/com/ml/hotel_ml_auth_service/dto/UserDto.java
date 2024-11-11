@@ -1,11 +1,17 @@
 package com.ml.hotel_ml_auth_service.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.Set;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserDto {
     private String email;
     private String password;
@@ -13,6 +19,6 @@ public class UserDto {
     private Set<RoleDto> roles;
     private String firstName;
     private String lastName;
-    private boolean isAccountNonExpired = true;
-    private boolean isEnabled = true;
+    private Boolean isAccountNonExpired = true;
+    private Boolean isEnabled = true;
 }

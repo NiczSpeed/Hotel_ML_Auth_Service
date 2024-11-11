@@ -40,7 +40,7 @@ public class User {
     @Column(name = "lastName")
     private String lastName;
     @Column(name = "isAccountNonExpired")
-    private boolean isAccountNonExpired;
+    private Boolean isAccountNonExpired;
     @Column(name = "isEnabled")
-    private boolean isEnabled;
+    private Boolean isEnabled;
 }

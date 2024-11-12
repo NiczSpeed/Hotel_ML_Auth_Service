@@ -18,14 +18,17 @@ import java.util.*;
 @Service
 public class JwtGeneratorService implements Serializable {
 
+
+    private final String secretKey;
+    private final long jwtExpiration;
     private final UserRepository userRepository;
-    @Value("${security.jwt.secret.key}")
-    private String secretKey;
 
-    @Value("${security.jwt.expiration.time}")
-    private long jwtExpiration;
-
-    public JwtGeneratorService(UserRepository userRepository) {
+    public JwtGeneratorService(
+            @Value(value = "${security.jwt.secret.key}") String secretKey,
+            @Value(value = "${security.jwt.expiration.time}") long jwtExpiration,
+            UserRepository userRepository) {
+        this.secretKey = secretKey;
+        this.jwtExpiration = jwtExpiration;
         this.userRepository = userRepository;
     }
 
@@ -38,7 +41,6 @@ public class JwtGeneratorService implements Serializable {
         Map<String, Object> claims = new HashMap<>();
         Set<String> roles = new HashSet<>();
         User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
-//        user.getRoles().forEach(role -> roles.add(encodeData(role.getName())));
         user.getRoles().forEach(role -> roles.add(role.getName()));
         claims.put("roles", roles);
         return createToken(claims, email);
@@ -48,7 +50,6 @@ public class JwtGeneratorService implements Serializable {
         return Jwts
                 .builder()
                 .subject(email)
-//                .subject(encodeData(email))
                 .claims(claims)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
@@ -60,11 +61,6 @@ public class JwtGeneratorService implements Serializable {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-
-//    private SecretKey getSecretKey() {
-//        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-//        return Keys.hmacShaKeyFor(keyBytes);
-//    }
 
     private String encodeData(String data) {
         return Base64.getEncoder().encodeToString(data.getBytes());

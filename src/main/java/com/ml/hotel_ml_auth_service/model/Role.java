@@ -1,5 +1,7 @@
+
 package com.ml.hotel_ml_auth_service.model;
 
+import com.ml.hotel_ml_auth_service.utils.converters.StringConverter;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -7,8 +9,8 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity(name = "roles")
+@Builder
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = {"users", "privileges"})
@@ -21,6 +23,7 @@ public class Role {
     private UUID uuid;
 
     @Column(name = "name")
+    @Convert(converter = StringConverter.class)
     private String name;
 
     @Column(name = "users")
@@ -29,12 +32,11 @@ public class Role {
 
     @Column(name = "privileges")
     @ManyToMany(fetch = FetchType.EAGER)
-//    @Cascade({org.hibernate.annotations.CascadeType.PERSIST, org.hibernate.annotations.CascadeType.MERGE})
     @JoinTable
-    (
-        name = "ROLES_PRIVILEGES",
-        joinColumns = @JoinColumn(name = "role_uuid"),
-        inverseJoinColumns = @JoinColumn(name = "privilege_uuid")
-    )
+            (
+                    name = "ROLES_PRIVILEGES",
+                    joinColumns = @JoinColumn(name = "role_uuid"),
+                    inverseJoinColumns = @JoinColumn(name = "privilege_uuid")
+            )
     private Set<Privilege> privileges;
 }

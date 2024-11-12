@@ -35,24 +35,10 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(authz -> authz
-//                        .requestMatchers("auth/register").permitAll()
-//                         .requestMatchers("auth/admin/**").hasRole("ADMIN")
                         .requestMatchers("/auth/token").permitAll()
                         .anyRequest().authenticated())
 
                 .httpBasic(Customizer.withDefaults())
-
-//                .httpBasic(Customizer.withDefaults()).formLogin(formLogin -> formLogin
-//                        .loginPage("/login")
-//                        .permitAll()
-//                )
-
-//                .httpBasic(Customizer.withDefaults()).logout(logout -> logout
-//                        .logoutUrl("/logout")
-//                        .addLogoutHandler(new SecurityContextLogoutHandler()))
-
-
-
                 .csrf(AbstractHttpConfigurer::disable)
                 .build();
     }

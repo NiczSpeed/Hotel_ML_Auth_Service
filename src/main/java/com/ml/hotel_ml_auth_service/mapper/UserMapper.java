@@ -25,8 +25,6 @@ public interface UserMapper {
     Set<UserDto> mapUserSetToUserDtoSet(Set<User> userSet);
     Set<User> mapUserDtoSetToUserSet(Set<UserDto> userDtoSet);
 
-    User mapUserResponseDetailsToUser(UserResponseDetailsDto userResponseDetailsDto);
-
     @Mapping(source = "roles", target = "role", qualifiedByName = "rolesToString")
     UserResponseDetailsDto mapUserToUserResponseDetailsDto(User user);
 

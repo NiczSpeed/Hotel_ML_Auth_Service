@@ -40,7 +40,6 @@ public class InitDataService {
             initPrivileges();
             initRoles();
             initUsers();
-            init();
         } catch (ErrorWhileSavePrivileges | ErrorWhileSaveRoles | ErrorWhileSaveUser e) {
             logger.warning(e.getMessage());
         }
@@ -91,11 +90,6 @@ public class InitDataService {
                     .build();
             userRepository.save(admin);
         }
-    }
-
-    @Transactional
-    protected void init() {
-        logger.warning(userRepository.findByEmail("admin@admin.com").get().getRoles().toString());
     }
 
 }

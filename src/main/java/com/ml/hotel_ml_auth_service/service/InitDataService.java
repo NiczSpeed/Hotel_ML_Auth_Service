@@ -32,7 +32,6 @@ public class InitDataService {
 
     Logger logger = Logger.getLogger(getClass().getName());
 
-
     @PostConstruct
     private void encryptDataInsideDatabase() {
         try {
@@ -42,8 +41,6 @@ public class InitDataService {
         } catch (ErrorWhileSavePrivilegesException | ErrorWhileSaveRolesException | ErrorWhileSaveUserException e) {
             logger.warning(e.getMessage());
         }
-
-
     }
 
     protected void initPrivileges() {

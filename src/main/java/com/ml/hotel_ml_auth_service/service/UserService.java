@@ -12,11 +12,9 @@ import com.ml.hotel_ml_auth_service.model.User;
 import com.ml.hotel_ml_auth_service.repository.GrantAdminLogRepository;
 import com.ml.hotel_ml_auth_service.repository.UserRepository;
 import com.ml.hotel_ml_auth_service.utils.EncryptorUtil;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -29,7 +27,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Base64;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
@@ -40,8 +37,6 @@ import static com.ml.hotel_ml_auth_service.mapper.UserMapper.Instance;
 @RequiredArgsConstructor
 public class UserService {
 
-
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(UserService.class);
     private final AuthenticationManager authenticationManager;
     private final RoleService roleService;
 
@@ -64,7 +59,7 @@ public class UserService {
             String messageId = json.optString("messageId");
             String email = jsonMessage.optString("email");
 
-            if (!userRepository.findAll().stream().anyMatch(user -> email.equals(user.getEmail()))) {
+            if (userRepository.findAll().stream().noneMatch(user -> email.equals(user.getEmail()))) {
                 UserDto userDto = UserDto.builder()
                         .email(jsonMessage.optString("email"))
                         .creationDate(LocalDate.now())
@@ -77,17 +72,16 @@ public class UserService {
                         .build();
                 User user = Instance.mapUserDtoToUser(userDto);
                 userRepository.save(user);
-                logger.info("User saved: " + userDto);
-                sendRequestMessage("User Successfully added!", messageId, "success_request_topic");
+                sendRequestMessage("User Successfully added.", messageId, "success_request_topic");
+                logger.info("User Successfully added:Message was sent.");
             } else {
-                logger.info("User already exists!");
-                sendRequestMessage("User already Exist!!", messageId, "error_request_topic");
+                sendRequestMessage("Error:User already Exist!", messageId, "error_request_topic");
+                logger.severe("Error:User already exists!");
             }
         } catch (Exception e) {
             logger.severe("Error while saving user: " + e.getMessage());
         }
     }
-
 
     @KafkaListener(topics = "login_topic", groupId = "hotel_ml_auth_service")
     protected void login(String message) throws UserNotFoundException {
@@ -100,13 +94,13 @@ public class UserService {
                     .email(jsonMessage.optString("email"))
                     .password(jsonMessage.optString("password"))
                     .build();
-            logger.info("Authenticating with email: and password: " + userDto.getEmail() + userDto.getPassword());
             if (isUserAuthenticated(userDto.getEmail(), userDto.getPassword())) {
                 String token = generateJwtToken(userDto.getEmail());
                 sendEncodedMessage(token, messageId, "jwt_topic");
-                logger.info("User successfully logged in, token was send!");
+                logger.info("User successfully logged in, token was send:Message was sent.");
             } else {
-                sendRequestMessage("Invalid username or password!", messageId, "error_request_topic");
+                sendRequestMessage("Error:Invalid username or password!", messageId, "error_request_topic");
+                logger.severe("Error:Invalid username or password!");
             }
         } catch (Exception e) {
             logger.severe("Error while login user: " + e.getMessage());
@@ -120,11 +114,10 @@ public class UserService {
             JSONObject json = new JSONObject(decodedMessage);
             JSONObject jsonMessage = json.getJSONObject("message");
             String messageId = json.optString("messageId");
-            logger.severe(jsonMessage.optString("currentEmail"));
             User user = userRepository.findUserByEmail(jsonMessage.optString("currentEmail"));
             if (user == null) {
                 sendRequestMessage("Error:User with such an email address does not exist!", messageId, "error_request_topic");
-                logger.severe("User with such an email address does not exist!");
+                logger.severe("Error:User with such an email address does not exist!");
             } else {
                 if (jsonMessage.has("email")) user.setEmail(jsonMessage.optString("email"));
                 if (jsonMessage.has("password"))
@@ -133,11 +126,8 @@ public class UserService {
                 if (jsonMessage.has("lastName")) user.setLastName(jsonMessage.optString("lastName"));
                 userRepository.save(user);
                 refreshAuthentication(user.getEmail());
-                logger.info("Refreshed authentication: " + SecurityContextHolder.getContext().getAuthentication());
                 sendRequestMessage("Your account has been successfully updated!", messageId, "success_request_topic");
-                logger.info("Your account has been successfully updated!");
-
-
+                logger.info("Your account has been successfully updated:Message was sent.");
             }
         } catch (Exception e) {
             logger.severe("Error while saving user: " + e.getMessage());
@@ -154,10 +144,10 @@ public class UserService {
             User grantee = userRepository.findUserByEmail(jsonMessage.optString("granteeEmail"));
             if (grantee == null) {
                 sendRequestMessage("Error:User with such an email address does not exist!", messageId, "error_request_topic");
-                logger.severe("User with such an email address does not exist!");
+                logger.severe("Error:User with such an email address does not exist!");
             } else if (grantee.getRoles().stream().anyMatch(role -> role.getName().equals("ADMIN"))) {
                 sendRequestMessage("Error:User already has Admin role!", messageId, "error_request_topic");
-                logger.severe("User already has Admin role!");
+                logger.severe("Error:User already has Admin role!");
             } else {
                 grantee.setRoles(Set.of(roleService.findRoleByName("ADMIN")));
                 userRepository.save(grantee);
@@ -168,7 +158,7 @@ public class UserService {
                 GrantAdminLog grantAdminLog = GrantAdminLogMapper.Instance.mapGrantAdminLogDtoToGrantAdminLog(grantAdminLogDto);
                 grantAdminLogRepository.save(grantAdminLog);
                 sendRequestMessage("Admin role was successfully granted!", messageId, "success_request_topic");
-                logger.info("Admin role was successfully granted!");
+                logger.info("Admin role was successfully granted:Message was sent.");
             }
         } catch (Exception e) {
             logger.severe("Error while saving user: " + e.getMessage());
@@ -185,8 +175,8 @@ public class UserService {
             User user = userRepository.findUserByEmail(jsonMessage.optString("email"));
             UserResponseDetailsDto userResponseDetailsDto = Instance.mapUserToUserResponseDetailsDto(user);
             JSONObject userDetailsJson = new JSONObject(userResponseDetailsDto);
-            logger.info("Data was sent!");
             sendEncodedMessage(userDetailsJson.toString(), messageId, "user_details_request_topic");
+            logger.info("User details were successfully updated:Message was sent.");
         } catch (Exception e) {
             logger.severe("Error while saving user: " + e.getMessage());
         }
@@ -204,11 +194,9 @@ public class UserService {
                 }
             }
             String encodedMessage = encryptorUtil.encrypt(json.toString());
-            logger.severe(encodedMessage);
             CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, encodedMessage);
             future.whenComplete((result, exception) -> {
                 if (exception != null) logger.severe(exception.getMessage());
-                else logger.info("Message send successfully!");
             });
         } catch (Exception e) {
             throw new ErrorWhileEncodeException();
@@ -217,13 +205,11 @@ public class UserService {
 
     private void refreshAuthentication(String email) {
         UserDetails updatedUserDetails = userDetailsService.loadUserByUsername(email);
-
         Authentication newAuthentication = new UsernamePasswordAuthenticationToken(
                 updatedUserDetails,
                 updatedUserDetails.getPassword(),
                 updatedUserDetails.getAuthorities()
         );
-
         SecurityContextHolder.getContext().setAuthentication(newAuthentication);
     }
 
@@ -231,35 +217,14 @@ public class UserService {
         return jwtGeneratorService.generateToken(email);
     }
 
-    private void validateJwtToken(String jwtToken) {
-        jwtGeneratorService.validateToken(jwtToken);
-    }
-
-    private JSONObject decodeMessage(String message) {
-        byte[] decodedBytes = Base64.getDecoder().decode(message);
-        message = new String(decodedBytes);
-        return new JSONObject(message);
-    }
-
-    boolean checkIfUserExists(String email) {
-        for (User user : userRepository.findAll()) {
-            if (user.getEmail().equals(email)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private String sendRequestMessage(String message, String messageId, String topic) {
+    private void sendRequestMessage(String message, String messageId, String topic) {
         JSONObject json = new JSONObject();
         json.put("messageId", messageId);
         json.put("message", message);
         CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, json.toString());
         future.whenComplete((result, exception) -> {
             if (exception != null) logger.severe(exception.getMessage());
-            else logger.info("Message send successfully!");
         });
-        return message;
     }
 
     private boolean isUserAuthenticated(String email, String password) {
@@ -269,16 +234,5 @@ public class UserService {
         } catch (Exception e) {
             return false;
         }
-
-
     }
-
-//    public User findByEmail(String email) {
-//        return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
-//    }
-//
-//    public User findUserByEmailAndPassword(String email, String password){
-//        return userRepository.findUserByEmailAndPassword(email, password).orElseThrow(ErrorWhileLogin::new);
-//    }
-
 }

@@ -11,6 +11,4 @@ public interface GrantAdminLogMapper {
     GrantAdminLogMapper Instance = Mappers.getMapper(GrantAdminLogMapper.class);
 
     GrantAdminLog mapGrantAdminLogDtoToGrantAdminLog(GrantAdminLogDto grantAdminLogDto);
-    GrantAdminLogDto mapGrantAdminLogToGrantAdminLog(GrantAdminLog grantAdminLog);
-
 }

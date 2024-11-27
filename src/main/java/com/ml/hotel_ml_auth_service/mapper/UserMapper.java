@@ -9,7 +9,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,12 +17,7 @@ public interface UserMapper {
 
     UserMapper Instance = Mappers.getMapper(UserMapper.class);
 
-    UserDto mapUserToUserDto(User user);
     User mapUserDtoToUser(UserDto userDto);
-    List<UserDto> mapUserListToUserDtoList(List<User> userList);
-    List<User> mapUserDtoListToUserList(List<UserDto> userDtoList);
-    Set<UserDto> mapUserSetToUserDtoSet(Set<User> userSet);
-    Set<User> mapUserDtoSetToUserSet(Set<UserDto> userDtoSet);
 
     @Mapping(source = "roles", target = "role", qualifiedByName = "rolesToString")
     UserResponseDetailsDto mapUserToUserResponseDetailsDto(User user);

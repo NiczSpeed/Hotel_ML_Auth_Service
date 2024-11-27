@@ -13,8 +13,6 @@ public class MyUserDetails implements UserDetails {
 
     private final User user;
 
-
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();

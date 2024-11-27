@@ -1,10 +1,7 @@
 package com.ml.hotel_ml_auth_service.service;
 
-import com.ml.hotel_ml_auth_service.exception.UserNotFoundException;
 import com.ml.hotel_ml_auth_service.model.User;
 import com.ml.hotel_ml_auth_service.repository.UserRepository;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -32,11 +29,6 @@ public class JwtGeneratorService implements Serializable {
         this.userRepository = userRepository;
     }
 
-
-    public Jws<Claims> validateToken(final String token) {
-        return Jwts.parser().verifyWith(getSecretKey()).build().parseSignedClaims(token);
-    }
-
     public String generateToken(String email) {
         Map<String, Object> claims = new HashMap<>();
         Set<String> roles = new HashSet<>();
@@ -61,9 +53,4 @@ public class JwtGeneratorService implements Serializable {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-
-    private String encodeData(String data) {
-        return Base64.getEncoder().encodeToString(data.getBytes());
-    }
-
 }

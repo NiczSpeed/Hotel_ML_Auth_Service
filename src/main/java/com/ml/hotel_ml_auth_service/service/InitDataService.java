@@ -10,7 +10,6 @@ import com.ml.hotel_ml_auth_service.repository.PrivilegeRepository;
 import com.ml.hotel_ml_auth_service.repository.RoleRepository;
 import com.ml.hotel_ml_auth_service.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -47,7 +46,6 @@ public class InitDataService {
 
     }
 
-    @Transactional
     protected void initPrivileges() {
         if (privilegeRepository.count() == 0) {
             Privilege readPrivilege = Privilege.builder()
@@ -60,7 +58,6 @@ public class InitDataService {
         }
     }
 
-    @Transactional
     protected void initRoles() {
         if (roleRepository.count() == 0) {
             Role userRole = Role.builder()
@@ -75,7 +72,6 @@ public class InitDataService {
         }
     }
 
-    @Transactional
     protected void initUsers() {
         if (userRepository.count() == 0) {
             User admin = User.builder()
@@ -91,5 +87,4 @@ public class InitDataService {
             userRepository.save(admin);
         }
     }
-
 }

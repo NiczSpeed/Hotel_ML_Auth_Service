@@ -40,7 +40,7 @@ public class JwtGeneratorService implements Serializable {
     public String generateToken(String email) {
         Map<String, Object> claims = new HashMap<>();
         Set<String> roles = new HashSet<>();
-        User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findUserByEmail(email);
         user.getRoles().forEach(role -> roles.add(role.getName()));
         claims.put("roles", roles);
         return createToken(claims, email);

@@ -4,11 +4,9 @@ import com.ml.hotel_ml_auth_service.dto.GrantAdminLogDto;
 import com.ml.hotel_ml_auth_service.dto.UserDto;
 import com.ml.hotel_ml_auth_service.dto.UserResponseDetailsDto;
 import com.ml.hotel_ml_auth_service.exception.ErrorWhileEncodeException;
-import com.ml.hotel_ml_auth_service.exception.ErrorWhileLogin;
 import com.ml.hotel_ml_auth_service.exception.UserNotFoundException;
 import com.ml.hotel_ml_auth_service.mapper.GrantAdminLogMapper;
 import com.ml.hotel_ml_auth_service.mapper.RoleMapper;
-import com.ml.hotel_ml_auth_service.mapper.UserMapper;
 import com.ml.hotel_ml_auth_service.model.GrantAdminLog;
 import com.ml.hotel_ml_auth_service.model.User;
 import com.ml.hotel_ml_auth_service.repository.GrantAdminLogRepository;
@@ -18,12 +16,15 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +41,7 @@ import static com.ml.hotel_ml_auth_service.mapper.UserMapper.Instance;
 public class UserService {
 
 
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(UserService.class);
     private final AuthenticationManager authenticationManager;
     private final RoleService roleService;
 
@@ -51,6 +53,7 @@ public class UserService {
     private final JwtGeneratorService jwtGeneratorService;
     private final GrantAdminLogRepository grantAdminLogRepository;
     private final EncryptorUtil encryptorUtil;
+    private final UserDetailsService userDetailsService;
 
     @KafkaListener(topics = "register_topic", groupId = "hotel_ml_auth_service")
     private void saveUser(String message) {
@@ -97,6 +100,7 @@ public class UserService {
                     .email(jsonMessage.optString("email"))
                     .password(jsonMessage.optString("password"))
                     .build();
+            logger.info("Authenticating with email: and password: " + userDto.getEmail() + userDto.getPassword());
             if (isUserAuthenticated(userDto.getEmail(), userDto.getPassword())) {
                 String token = generateJwtToken(userDto.getEmail());
                 sendEncodedMessage(token, messageId, "jwt_topic");
@@ -106,6 +110,37 @@ public class UserService {
             }
         } catch (Exception e) {
             logger.severe("Error while login user: " + e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "update_user_topic", groupId = "hotel_ml_auth_service")
+    protected void updateUser(String message) throws UserNotFoundException {
+        try {
+            String decodedMessage = encryptorUtil.decrypt(message);
+            JSONObject json = new JSONObject(decodedMessage);
+            JSONObject jsonMessage = json.getJSONObject("message");
+            String messageId = json.optString("messageId");
+            logger.severe(jsonMessage.optString("currentEmail"));
+            User user = userRepository.findUserByEmail(jsonMessage.optString("currentEmail"));
+            if (user == null) {
+                sendRequestMessage("Error:User with such an email address does not exist!", messageId, "error_request_topic");
+                logger.severe("User with such an email address does not exist!");
+            } else {
+                if (jsonMessage.has("email")) user.setEmail(jsonMessage.optString("email"));
+                if (jsonMessage.has("password"))
+                    user.setPassword(passwordEncoder.encode(jsonMessage.optString("password")));
+                if (jsonMessage.has("firstName")) user.setFirstName(jsonMessage.optString("firstName"));
+                if (jsonMessage.has("lastName")) user.setLastName(jsonMessage.optString("lastName"));
+                userRepository.save(user);
+                refreshAuthentication(user.getEmail());
+                logger.info("Refreshed authentication: " + SecurityContextHolder.getContext().getAuthentication());
+                sendRequestMessage("Your account has been successfully updated!", messageId, "success_request_topic");
+                logger.info("Your account has been successfully updated!");
+
+
+            }
+        } catch (Exception e) {
+            logger.severe("Error while saving user: " + e.getMessage());
         }
     }
 
@@ -147,7 +182,7 @@ public class UserService {
             JSONObject json = new JSONObject(decodedMessage);
             JSONObject jsonMessage = json.getJSONObject("message");
             String messageId = json.optString("messageId");
-            User user = userRepository.findUserByEmail(jsonMessage .optString("email"));
+            User user = userRepository.findUserByEmail(jsonMessage.optString("email"));
             UserResponseDetailsDto userResponseDetailsDto = Instance.mapUserToUserResponseDetailsDto(user);
             JSONObject userDetailsJson = new JSONObject(userResponseDetailsDto);
             logger.info("Data was sent!");
@@ -178,6 +213,18 @@ public class UserService {
         } catch (Exception e) {
             throw new ErrorWhileEncodeException();
         }
+    }
+
+    private void refreshAuthentication(String email) {
+        UserDetails updatedUserDetails = userDetailsService.loadUserByUsername(email);
+
+        Authentication newAuthentication = new UsernamePasswordAuthenticationToken(
+                updatedUserDetails,
+                updatedUserDetails.getPassword(),
+                updatedUserDetails.getAuthorities()
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(newAuthentication);
     }
 
     private String generateJwtToken(String email) {

@@ -1,8 +1,8 @@
 package com.ml.hotel_ml_auth_service.service;
 
-import com.ml.hotel_ml_auth_service.exception.ErrorWhileSavePrivileges;
-import com.ml.hotel_ml_auth_service.exception.ErrorWhileSaveRoles;
-import com.ml.hotel_ml_auth_service.exception.ErrorWhileSaveUser;
+import com.ml.hotel_ml_auth_service.exception.ErrorWhileSavePrivilegesException;
+import com.ml.hotel_ml_auth_service.exception.ErrorWhileSaveRolesException;
+import com.ml.hotel_ml_auth_service.exception.ErrorWhileSaveUserException;
 import com.ml.hotel_ml_auth_service.model.Privilege;
 import com.ml.hotel_ml_auth_service.model.Role;
 import com.ml.hotel_ml_auth_service.model.User;
@@ -40,7 +40,7 @@ public class InitDataService {
             initPrivileges();
             initRoles();
             initUsers();
-        } catch (ErrorWhileSavePrivileges | ErrorWhileSaveRoles | ErrorWhileSaveUser e) {
+        } catch (ErrorWhileSavePrivilegesException | ErrorWhileSaveRolesException | ErrorWhileSaveUserException e) {
             logger.warning(e.getMessage());
         }
 

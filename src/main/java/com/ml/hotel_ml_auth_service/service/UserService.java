@@ -60,16 +60,7 @@ public class UserService {
             String email = jsonMessage.optString("email");
 
             if (userRepository.findAll().stream().noneMatch(user -> email.equals(user.getEmail()))) {
-                UserDto userDto = UserDto.builder()
-                        .email(jsonMessage.optString("email"))
-                        .creationDate(LocalDate.now())
-                        .isEnabled(true)
-                        .isAccountNonExpired(true)
-                        .password(passwordEncoder.encode(jsonMessage.optString("password")))
-                        .roles(RoleMapper.Instance.mapRoleSetToRoleDtoSet((Set.of(roleService.findRoleByName("USER")))))
-                        .firstName(jsonMessage.optString("firstName"))
-                        .lastName(jsonMessage.optString("lastName"))
-                        .build();
+                UserDto userDto = UserDto.builder().email(jsonMessage.optString("email")).creationDate(LocalDate.now()).isEnabled(true).isAccountNonExpired(true).password(passwordEncoder.encode(jsonMessage.optString("password"))).roles(RoleMapper.Instance.mapRoleSetToRoleDtoSet((Set.of(roleService.findRoleByName("USER"))))).firstName(jsonMessage.optString("firstName")).lastName(jsonMessage.optString("lastName")).build();
                 User user = Instance.mapUserDtoToUser(userDto);
                 userRepository.save(user);
                 sendRequestMessage("User Successfully added.", messageId, "success_request_topic");
@@ -90,10 +81,7 @@ public class UserService {
             JSONObject json = new JSONObject(decodedMessage);
             JSONObject jsonMessage = json.getJSONObject("message");
             String messageId = json.optString("messageId");
-            UserDto userDto = UserDto.builder()
-                    .email(jsonMessage.optString("email"))
-                    .password(jsonMessage.optString("password"))
-                    .build();
+            UserDto userDto = UserDto.builder().email(jsonMessage.optString("email")).password(jsonMessage.optString("password")).build();
             if (isUserAuthenticated(userDto.getEmail(), userDto.getPassword())) {
                 String token = generateJwtToken(userDto.getEmail());
                 sendEncodedMessage(token, messageId, "jwt_topic");
@@ -119,7 +107,7 @@ public class UserService {
                 sendRequestMessage("Error:User with such an email address does not exist!", messageId, "error_request_topic");
                 logger.severe("Error:User with such an email address does not exist!");
             } else {
-                if (userRepository.findUserByEmail(jsonMessage.optString("email")) != null) {
+                if (userRepository.findUserByEmail(jsonMessage.optString("email")) != null && userRepository.findUserByEmail(jsonMessage.optString("email")).getEmail().equals(jsonMessage.optString("currentEmial"))) {
                     sendRequestMessage("Error:This email address is already taken!", messageId, "error_request_topic");
                     logger.severe("Error:This email address is already taken!");
                 } else {
@@ -157,10 +145,7 @@ public class UserService {
             } else {
                 grantee.setRoles(Set.of(roleService.findRoleByName("ADMIN")));
                 userRepository.save(grantee);
-                GrantAdminLogDto grantAdminLogDto = GrantAdminLogDto.builder()
-                        .grantor(jsonMessage.optString("grantorEmail"))
-                        .grantee(jsonMessage.optString("granteeEmail"))
-                        .build();
+                GrantAdminLogDto grantAdminLogDto = GrantAdminLogDto.builder().grantor(jsonMessage.optString("grantorEmail")).grantee(jsonMessage.optString("granteeEmail")).build();
                 GrantAdminLog grantAdminLog = GrantAdminLogMapper.Instance.mapGrantAdminLogDtoToGrantAdminLog(grantAdminLogDto);
                 grantAdminLogRepository.save(grantAdminLog);
                 sendRequestMessage("Admin role was successfully granted!", messageId, "success_request_topic");
@@ -211,11 +196,7 @@ public class UserService {
 
     private void refreshAuthentication(String email) {
         UserDetails updatedUserDetails = userDetailsService.loadUserByUsername(email);
-        Authentication newAuthentication = new UsernamePasswordAuthenticationToken(
-                updatedUserDetails,
-                updatedUserDetails.getPassword(),
-                updatedUserDetails.getAuthorities()
-        );
+        Authentication newAuthentication = new UsernamePasswordAuthenticationToken(updatedUserDetails, updatedUserDetails.getPassword(), updatedUserDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(newAuthentication);
     }
 

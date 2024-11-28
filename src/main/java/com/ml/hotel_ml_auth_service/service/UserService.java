@@ -119,15 +119,21 @@ public class UserService {
                 sendRequestMessage("Error:User with such an email address does not exist!", messageId, "error_request_topic");
                 logger.severe("Error:User with such an email address does not exist!");
             } else {
-                if (jsonMessage.has("email")) user.setEmail(jsonMessage.optString("email"));
-                if (jsonMessage.has("password"))
-                    user.setPassword(passwordEncoder.encode(jsonMessage.optString("password")));
-                if (jsonMessage.has("firstName")) user.setFirstName(jsonMessage.optString("firstName"));
-                if (jsonMessage.has("lastName")) user.setLastName(jsonMessage.optString("lastName"));
-                userRepository.save(user);
-                refreshAuthentication(user.getEmail());
-                sendRequestMessage("Your account has been successfully updated!", messageId, "success_request_topic");
-                logger.info("Your account has been successfully updated:Message was sent.");
+                if (userRepository.findUserByEmail(jsonMessage.optString("email")) != null) {
+                    sendRequestMessage("Error:This email address is already taken!", messageId, "error_request_topic");
+                    logger.severe("Error:This email address is already taken!");
+                } else {
+                    if (jsonMessage.has("email")) user.setEmail(jsonMessage.optString("email"));
+                    if (jsonMessage.has("password"))
+                        user.setPassword(passwordEncoder.encode(jsonMessage.optString("password")));
+                    if (jsonMessage.has("firstName")) user.setFirstName(jsonMessage.optString("firstName"));
+                    if (jsonMessage.has("lastName")) user.setLastName(jsonMessage.optString("lastName"));
+                    userRepository.save(user);
+                    refreshAuthentication(user.getEmail());
+                    sendRequestMessage("Your account has been successfully updated!", messageId, "success_request_topic");
+                    logger.info("Your account has been successfully updated:Message was sent.");
+                }
+
             }
         } catch (Exception e) {
             logger.severe("Error while saving user: " + e.getMessage());

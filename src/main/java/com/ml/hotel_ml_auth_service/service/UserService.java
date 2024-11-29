@@ -107,7 +107,7 @@ public class UserService {
                 sendRequestMessage("Error:User with such an email address does not exist!", messageId, "error_request_topic");
                 logger.severe("Error:User with such an email address does not exist!");
             } else {
-                if (userRepository.findUserByEmail(jsonMessage.optString("email")) != null && userRepository.findUserByEmail(jsonMessage.optString("email")).getEmail().equals(jsonMessage.optString("currentEmial"))) {
+                if (userRepository.findUserByEmail(jsonMessage.optString("email")) != null && !userRepository.findUserByEmail(jsonMessage.optString("email")).getEmail().equals(jsonMessage.optString("currentEmail"))) {
                     sendRequestMessage("Error:This email address is already taken!", messageId, "error_request_topic");
                     logger.severe("Error:This email address is already taken!");
                 } else {

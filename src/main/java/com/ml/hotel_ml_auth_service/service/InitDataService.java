@@ -33,7 +33,7 @@ public class InitDataService {
     Logger logger = Logger.getLogger(getClass().getName());
 
     @PostConstruct
-    private void encryptDataInsideDatabase() {
+    private void init() {
         try {
             initPrivileges();
             initRoles();

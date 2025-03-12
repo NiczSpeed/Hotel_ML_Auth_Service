@@ -88,4 +88,3 @@ Hotel_ML_Auth_Service is a backend microservice based on **Spring Boot**, that i
 │── src/main/resources/application.yml                      # Application configuration
 │──.env                                                 # Environment variables for the Docker container
 │── Dockerfile                                          # Docker image definition
-│── compose.yml                                         # Launching applications and dependencies

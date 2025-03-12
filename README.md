@@ -13,6 +13,7 @@ Hotel_ML_Auth_Service is a backend microservice based on **Spring Boot**, that i
 - ✅ User Data Modification
 - ✅ Admin Privilege Management
 - ✅ JWT Token Generation
+- ✅ AES Encryption for Stored and Brokered Data
 ---
 
 ## 🔧 Technologies

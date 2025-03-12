@@ -43,7 +43,7 @@ Hotel_ML_Auth_Service is a backend microservice based on **Spring Boot**, that i
 │   ├── dto/                                                # DTO layer
 │   │   ├── GrantAdminLogDto.java                               # Dto for GrantAdminLog
 │   │   ├── PrivilegeDto.java                                   # Dto for Privilege entity
-│   │   ├── RoleDto.java                                        # Dto for role entity
+│   │   ├── RoleDto.java                                        # Dto for Role entity
 │   │   ├── UserDto.java                                        # Dto for User entity
 │   │   ├── UserResponseDetailsDto.java                         # Dto manage the response for user data
 │   ├── exceptions/                                         # Additional exceptions of the microservices

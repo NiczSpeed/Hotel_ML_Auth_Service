@@ -68,14 +68,14 @@ Hotel_ML_Auth_Service is a backend microservice based on **Spring Boot**, that i
 │   ├── repository/                                         # The layer of connection of entities to the database
 │   │   ├── GrantAdminLogRepository.java                        # GrantAdminLog repository
 │   │   ├── PrivilegeRepository.java                            # Privilege repository
-│   │   ├── RoleService.java                                    # RoleS repository
+│   │   ├── RoleService.java                                    # Role repository
 │   │   ├── UserDetailsRepository.java                          # UserDetails repository
 │   │   ├── UserRepository.java                                 # User repository
 │   ├── service                                             # Business logic layer
 │   │   ├── InitDataService.java                                # Logic for adding privileges, roles, and admin accounts if they don't already exist
 │   │   ├── JwtGeneratorService.java                            # JWT token generation logic
 │   │   ├── PrivilegeService.java                               # The logic of privileges
-│   │   ├── JRoleService.java                                   # The logic of the roles
+│   │   ├── RoleService.java                                    # The logic of the roles
 │   │   ├── UserDetailsService.java                             # The logic of UserDetails
 │   │   ├── UserService.java                                    # User logic among others login, registration or data modification
 │   ├── utils/                                              # Additional functionalities 

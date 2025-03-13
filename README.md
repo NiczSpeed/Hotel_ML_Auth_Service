@@ -113,21 +113,21 @@ These diagrams illustrate the main object-oriented structure of the application,
 #### 💼 GrantAdminLog Business Logic Classes
 This diagram ilustrates GrantAdminLog business logic classes in service
 
-🔗 [View the GrantAdminLog business logic classes](docs/Entity/Hotel_ML_Auth_Service_Diagram_Business_Logic_GrantAdminLog.svg)
+🔗 [View the GrantAdminLog business logic classes](docs/Class/Hotel_ML_Auth_Service_Diagram_Business_Logic_GrantAdminLog.svg)
 
 ---
 
 #### 👑 Privilege Business Logic Classes
 This diagram ilustrates privilege business logic classes in service
 
-🔗 [View the Privilege business logic classes](docs/Entity/Hotel_ML_Auth_Service_Diagram_Business_Logic_Privilege.svg)
+🔗 [View the Privilege business logic classes](docs/Class/Hotel_ML_Auth_Service_Diagram_Business_Logic_Privilege.svg)
 
 ---
 
 #### 🎭 Role Business Logic Classes
 This diagram ilustrates role business logic classes in service
 
-🔗 [View the role business logic classes](docs/Entity/Hotel_ML_Auth_Service_Diagram_Business_Logic_Role.svg)
+🔗 [View the role business logic classes](docs/Class/Hotel_ML_Auth_Service_Diagram_Business_Logic_Role.svg)
 
 ---
 
@@ -139,48 +139,48 @@ The diagram presents the concepts of Producer and Listener-Responder, defining r
 * Producer – sends data to the appropriate services via Apache Kafka brokers.
 * Listener-Responder – receives a message and directly returns a response to the sender, without additional multithreading layers.
 
-🔗 [View the user business logic classes](docs/Entity/Hotel_ML_Auth_Service_Diagram_Business_Logic_User.svg)
+🔗 [View the user business logic classes](docs/Class/Hotel_ML_Auth_Service_Diagram_Business_Logic_User.svg)
 
 ---
 
 #### 🔒 Security Logic Classes
 This diagram ilustrates security logic classes in service
 
-🔗 [View the security logic classes](docs/Entity/Hotel_ML_Auth_Service_Diagram_Security.svg)
+🔗 [View the security logic classes](docs/Class/Hotel_ML_Auth_Service_Diagram_Security.svg)
 
 ---
 
 #### 🔐 JWT Logic Classes
 This diagram ilustrates JWT logic classes in service
 
-🔗 [View the JWT logic classes](docs/Entity/Hotel_ML_Auth_Service_Diagram_Logic_JWT.svg)
+🔗 [View the JWT logic classes](docs/Class/Hotel_ML_Auth_Service_Diagram_Logic_JWT.svg)
 
 ---
 
 #### 🛡️ Encryption Classes
 This diagram illustrates encryption classes in service
 
-🔗 [View the encryption classes](docs/Entity/Hotel_ML_Auth_Service_Diagram_encryption.svg)
+🔗 [View the encryption classes](docs/Class/Hotel_ML_Auth_Service_Diagram_encryption.svg)
 
 ---
 
 #### 🚨 Exception Classes
 This diagram illustrates exception classes in service
 
-🔗 [View the exception classes](docs/Entity/Hotel_ML_Auth_Service_Diagram_Exceptions.svg)
+🔗 [View the exception classes](docs/Class/Hotel_ML_Auth_Service_Diagram_Exceptions.svg)
 
 ---
 
 #### ⚙️ Configuration Classes
 This diagram ilustrates configuration classes in service
 
-🔗 [View the configuration classes](docs/Entity/Hotel_ML_Auth_Service_Diagram_Configuration.svg)
+🔗 [View the configuration classes](docs/Class/Hotel_ML_Auth_Service_Diagram_Configuration.svg)
 
 ---
 
 #### 🚀 Data Initialization Classes
 This diagram ilustrates data initialization classes in service
 
-🔗 [View the data initialization classes](docs/Entity/Hotel_ML_Auth_Service_Diagram_Data_Initialization.svg)
+🔗 [View the data initialization classes](docs/Class/Hotel_ML_Auth_Service_Diagram_Data_Initialization.svg)
 
 ---

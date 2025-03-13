@@ -14,7 +14,7 @@ Hotel_ML_Auth_Service is a backend microservice based on **Spring Boot**, that i
 > To launch an application using the described service, go to:
 > ➡️ [Main README](https://github.com/NiczSpeed/HotelML?tab=readme-ov-file#%EF%B8%8F-how-to-run-the-entire-system)
 
-📌 **Key Features::**
+📌 **Key Features:**
 - ✅ Login process
 - ✅ Registration process
 - ✅ User Data Modification
